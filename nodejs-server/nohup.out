@@ -1,0 +1,94 @@
+Server running on http://localhost:5000
+Connected to the MySQL database.
+Server running on http://localhost:5000
+Connected to the MySQL database.
+/root/bachelor_thesis/nodejs-server/backend-data.js:32
+const { username, password } = await getAuthDetails();
+                               ^^^^^
+
+SyntaxError: await is only valid in async functions and the top level bodies of modules
+    at internalCompileFunction (node:internal/vm:73:18)
+    at wrapSafe (node:internal/modules/cjs/loader:1178:20)
+    at Module._compile (node:internal/modules/cjs/loader:1220:27)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1310:10)
+    at Module.load (node:internal/modules/cjs/loader:1119:32)
+    at Module._load (node:internal/modules/cjs/loader:960:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:86:12)
+    at node:internal/main/run_main_module:23:47
+
+Node.js v18.18.2
+Server running on http://localhost:5000
+/root/bachelor_thesis/nodejs-server/backend-data.js:25
+                reject(new Error('Invalid auth.txt format'));
+                       ^
+
+Error: Invalid auth.txt format
+    at /root/bachelor_thesis/nodejs-server/backend-data.js:25:24
+    at FSReqCallback.readFileAfterClose [as oncomplete] (node:internal/fs/read_file_context:68:3)
+
+Node.js v18.18.2
+Server running on http://localhost:5000
+Error fetching data: Error: Access denied for user ''@'localhost' (using password: NO)
+    at Packet.asError (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/packets/packet.js:728:17)
+    at ClientHandshake.execute (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/commands/command.js:29:26)
+    at Connection.handlePacket (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/connection.js:481:34)
+    at PacketParser.onPacket (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/connection.js:97:12)
+    at PacketParser.executeStart (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/packet_parser.js:75:16)
+    at Socket.<anonymous> (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/connection.js:104:25)
+    at Socket.emit (node:events:517:28)
+    at addChunk (node:internal/streams/readable:335:12)
+    at readableAddChunk (node:internal/streams/readable:308:9)
+    at Readable.push (node:internal/streams/readable:245:10) {
+  code: 'ER_ACCESS_DENIED_ERROR',
+  errno: 1045,
+  sqlState: '28000',
+  sqlMessage: "Access denied for user ''@'localhost' (using password: NO)",
+  sql: undefined
+}
+node:events:495
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: listen EADDRINUSE: address already in use :::5000
+    at Server.setupListenHandle [as _listen2] (node:net:1817:16)
+    at listenInCluster (node:net:1865:12)
+    at Server.listen (node:net:1953:7)
+    at Function.listen (/root/bachelor_thesis/nodejs-server/node_modules/express/lib/application.js:635:24)
+    at Object.<anonymous> (/root/bachelor_thesis/nodejs-server/backend-data.js:74:5)
+    at Module._compile (node:internal/modules/cjs/loader:1256:14)
+    at Module._extensions..js (node:internal/modules/cjs/loader:1310:10)
+    at Module.load (node:internal/modules/cjs/loader:1119:32)
+    at Module._load (node:internal/modules/cjs/loader:960:12)
+    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:86:12)
+Emitted 'error' event on Server instance at:
+    at emitErrorNT (node:net:1844:8)
+    at process.processTicksAndRejections (node:internal/process/task_queues:82:21) {
+  code: 'EADDRINUSE',
+  errno: -98,
+  syscall: 'listen',
+  address: '::',
+  port: 5000
+}
+
+Node.js v18.18.2
+Server running on http://localhost:5000
+entry_reader:52Nq8&hJ57uWB8
+Error fetching data: Error: Access denied for user ''@'localhost' (using password: NO)
+    at Packet.asError (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/packets/packet.js:728:17)
+    at ClientHandshake.execute (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/commands/command.js:29:26)
+    at Connection.handlePacket (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/connection.js:481:34)
+    at PacketParser.onPacket (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/connection.js:97:12)
+    at PacketParser.executeStart (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/packet_parser.js:75:16)
+    at Socket.<anonymous> (/root/bachelor_thesis/nodejs-server/node_modules/mysql2/lib/connection.js:104:25)
+    at Socket.emit (node:events:517:28)
+    at addChunk (node:internal/streams/readable:335:12)
+    at readableAddChunk (node:internal/streams/readable:308:9)
+    at Readable.push (node:internal/streams/readable:245:10) {
+  code: 'ER_ACCESS_DENIED_ERROR',
+  errno: 1045,
+  sqlState: '28000',
+  sqlMessage: "Access denied for user ''@'localhost' (using password: NO)",
+  sql: undefined
+}
+Server running on http://localhost:5000
+Connected to the MySQL database.
