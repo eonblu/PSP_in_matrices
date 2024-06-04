@@ -5,6 +5,7 @@ import mysql.connector as mysql
 import pickle
 
 import mysql_connection
+from matrices import *
 import MinMaxHeapTriplets
 from MinMaxHeapTriplets import *
 
@@ -18,19 +19,20 @@ def retrieve_matrix(matrix_id):
     conn = mysql_connection.new_connection()
     cursor = conn.cursor()
 
-    cursor.execute("SELECT MatrixBlob, MRows, MColumns FROM Matrices WHERE MatrixID = %s", (matrix_id,))
+    cursor.execute("SELECT MatrixSeed, MRows FROM Matrices WHERE MatrixID = %s", (matrix_id,))
     result = cursor.fetchone()
 
     if result:
-        binary_data, rows, columns = result
-        matrix = pickle.loads(binary_data)
+        print (result)
+        seed, rows = result
+        matrix = create_matrix_with_ssp(seed, rows)
         print("Retrieved matrix: \n", matrix)
 
     cursor.close()
     mysql_connection.close_connection(conn)
-    return matrix, rows, columns, matrix_id
+    return matrix, rows, matrix_id
 
-def Bienstock(matrix, rows, columns, matrixid, CompsObj):
+def Bienstock(matrix, rows, matrixid, CompsObj):
     heap = MinMaxHeap(rows)
     for i in range(rows):
         heap.insert_triplet([matrix[i][i], i, i], CompsObj)
@@ -78,6 +80,6 @@ def UpdateResult(matrixid, field_name, result):
 
 if __name__ == '__main__':
     CompsObj = Comparisons()
-    matrix, rows, columns, matrixid = retrieve_matrix(10)
-    Bienstock(matrix, rows, columns, matrixid, CompsObj)
+    matrix, rows, matrixid = retrieve_matrix(1)
+    Bienstock(matrix, rows, matrixid, CompsObj)
     print (CompsObj.value)

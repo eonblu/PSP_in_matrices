@@ -92,3 +92,5 @@ Error fetching data: Error: Access denied for user ''@'localhost' (using passwor
 }
 Server running on http://localhost:5000
 Connected to the MySQL database.
+Server running on http://localhost:5000
+Connected to the MySQL database.
