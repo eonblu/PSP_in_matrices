@@ -11,14 +11,13 @@ def load_auth(access_rights):
         for line in file:
             line = line.strip()
 
-            if line.startswith('[creator]') and access_rights == "creator":
+            if line.startswith('[creator]') and access_rights == 'creator':
                 username, password = line.replace('[creator]','').split(':', 1)
                 return username, password
             elif line.startswith('[reader]') and access_rights == "reader":
                 username, password = line.replace('[reader]','').split(':', 1)
                 return username, password
-            else:
-                return "No correct user selected"
+    return "No correct user selected", " "
 
 def new_connection():
     try:
