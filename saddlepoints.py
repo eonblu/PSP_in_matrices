@@ -69,8 +69,11 @@ def BienstockAlgorithm(matrix, rows, matrixid, CompsObj):
 def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
     # define the block size
     l = math.ceil(math.log(rows, 2))
-    # calculate the  amount of rows in the auxiliry matrix
-    aux_rows = math.floor(rows/l) + 1
+    # calculate the amount of rows in the auxiliry matrix, if case for no overlapping
+    if rows % l == 0:
+        aux_rows = math.floor(rows/l)
+    else:
+        aux_rows = math.floor(rows/l) + 1
     aux_heap = MinMaxHeap(aux_rows)
     original_position_dict = {}
     # add PSP along the diagonal besides the last block that may be overlapping
@@ -83,13 +86,15 @@ def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
         aux_heap.insert_triplet([PSP[0], i//l, i//l], CompsObj)
         original_position_dict[(PSP[0], i//l, i//l)] = [PSP[0], PSP[1] + i, PSP[2] + i]
 
-    # add the final, possibly overlapping element of the original matrix
+    # add the final, possibly overlapping element of the original matrix, if necessary
     m_rows, m_cols = matrix.shape
-    PSP = BienstockBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj)
-    aux_heap.insert_triplet([PSP[0], aux_rows-1, aux_rows-1], CompsObj)
-    original_position_dict[(PSP[0], aux_rows-1, aux_rows-1)] = [PSP[0], m_rows - l + PSP[1], m_rows - l + PSP[2]]
+    if rows % l == 0:
+        PSP = BienstockBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj)
+        aux_heap.insert_triplet([PSP[0], aux_rows-1, aux_rows-1], CompsObj)
+        original_position_dict[(PSP[0], aux_rows-1, aux_rows-1)] = [PSP[0], m_rows - l + PSP[1], m_rows - l + PSP[2]]
 
     while aux_heap.size > 1: # done heapsize-1 times
+        print(aux_heap.a)
         currentmax = aux_heap.peekmax(CompsObj)
         currentmin = aux_heap.peekmin(CompsObj)
         # now need to evaluate PSP of aux matrix at position A[i,l]
@@ -124,7 +129,7 @@ def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
             del original_position_dict[(currentmin[0], currentmin[1], currentmin[2])]
             original_position_dict[(currentquery[0], aux_i, aux_l)] = new_value
             aux_heap.insert_triplet([currentquery[0], aux_i, aux_l], CompsObj)
-    UpdateResult(matrixid, "RecursiveRes", CompsObj.value)
+    # UpdateResult(matrixid, "RecursiveRes", CompsObj.value)
     print(original_position_dict)
 
 def UpdateResult(matrixid, field_name, result):
@@ -143,8 +148,11 @@ def UpdateResult(matrixid, field_name, result):
             conn.close()
 
 if __name__ == '__main__':
-    CompsObjB = Comparisons()
-    CompsObjR = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(15)
-    BienstockAlgorithm(matrix, rows, 15, CompsObjB)
-    RecursiveAlgorithm(matrix, rows, 15, CompsObjR)
+    # CompsObjB = Comparisons()
+    # CompsObjR = Comparisons()
+    # matrix, rows, matrixid = retrieve_matrix(15)
+    # BienstockAlgorithm(matrix, rows, 15, CompsObjB)
+    # RecursiveAlgorithm(matrix, rows, 15, CompsObjR)
+    
+    # print(BienstockBase([[5,5],[3,3]], 2, Comparisons()))
+    # RecursiveAlgorithm(np.array([[6,5,5,5],[3,4,3,3],[3,5,4,4],[3,5,4,4]]), 4, 0, Comparisons())
