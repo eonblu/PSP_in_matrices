@@ -22,12 +22,12 @@ def create_matrix_with_ssp(random_seed, rows):
         # sets the seed to a predictable value such that matrices can be generated again just based on seed
         np.random.seed(random_seed + i)
         if i != ssp_column and matrix[ssp_row][i] >= ssp_value:
-            matrix[ssp_row][i] = np.random.randint(0, ssp_value)
+            matrix[ssp_row][i] = np.random.randint(0, ssp_value - 1)
 
     for i in range(rows):
         np.random.seed(random_seed + i)
         if i != ssp_row and matrix[i][ssp_column] <= ssp_value:
-            matrix[i][ssp_column] = np.random.randint(ssp_value, 2*rows)
+            matrix[i][ssp_column] = np.random.randint(ssp_value + 1, 2*rows)
     
     return matrix
 
@@ -53,7 +53,7 @@ def add_to_mysql_table(matrix, seed):
 
 if __name__ == '__main__':
     seed = 216
-    r = 20
+    r = 8
     matrix1 = create_matrix_with_ssp(seed, r)
     print (matrix1)
     add_to_mysql_table(matrix1, seed)
