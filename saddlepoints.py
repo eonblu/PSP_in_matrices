@@ -84,13 +84,13 @@ def RecursiveBase(matrix, rows, CompsObj):
         aux_heap.insert_triplet([PSP[0], i//l, i//l], CompsObj)
         original_position_dict[(PSP[0], i//l, i//l)] = [PSP[0], PSP[1] + i, PSP[2] + i]
 
-    # add the final, overlapping element of the original matrix, if there are leftover rows/columns, store aux position and real position
+    # add the final, possibly overlapping element of the original matrix, if there are leftover rows/columns, store aux position and real position
     m_rows, m_cols = matrix.shape
-    if rows % l == 0:
-        PSP = BienstockBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj)
-        aux_heap.insert_triplet([PSP[0], aux_rows-1, aux_rows-1], CompsObj)
-        original_position_dict[(PSP[0], aux_rows-1, aux_rows-1)] = [PSP[0], m_rows - l + PSP[1], m_rows - l + PSP[2]]
-
+    PSP = BienstockBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj)
+    aux_heap.insert_triplet([PSP[0], aux_rows-1, aux_rows-1], CompsObj)
+    original_position_dict[(PSP[0], aux_rows-1, aux_rows-1)] = [PSP[0], m_rows - l + PSP[1], m_rows - l + PSP[2]]
+    
+    print(aux_heap.a)
     while aux_heap.size > 1: # done heapsize-1 times
         currentmax = aux_heap.peekmax(CompsObj)
         currentmin = aux_heap.peekmin(CompsObj)
@@ -135,7 +135,7 @@ def RecursiveBase(matrix, rows, CompsObj):
             aux_heap.insert_triplet([currentquery[0], aux_i, aux_l], CompsObj)
         else:
             raise ValueError('There was an error in the heap structure')
-    print(original_position_dict)
+    print("Dict - Auxiliary position:Real position",original_position_dict)
 
 def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
     RecursiveBase(matrix, rows, CompsObj)
@@ -158,10 +158,12 @@ def UpdateResult(matrixid, field_name, result):
             conn.close()
 
 if __name__ == '__main__':
-    CompsObjB = Comparisons()
-    CompsObjR = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(1)
-    BienstockAlgorithm(matrix, rows, 1, CompsObjB)
-    RecursiveAlgorithm(matrix, rows, 1, CompsObjR)
+    # CompsObjB = Comparisons()
+    # CompsObjR = Comparisons()
+    # matrix, rows, matrixid = retrieve_matrix(16)
+    # BienstockAlgorithm(matrix, rows, 16, CompsObjB)
+    # RecursiveAlgorithm(matrix, rows, 16, CompsObjR)
     # print(BienstockBase([[3,5],[3,5]], 2, Comparisons()))
-    # RecursiveAlgorithm(np.array([[6,5,5,5],[3,4,3,3],[3,5,4,4],[3,5,4,4]]), 4, 0, Comparisons())
+    
+    # RecursiveBase(np.array([[2,2,2,2,2,2,2,4],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[1,0,0,0,0,0,0,5]]), 8, Comparisons())
+    # RecursiveBase(np.array([[1,1,1,2],[2,2,2,3],[3,3,3,3],[4,4,4,4]]), 4, Comparisons())
