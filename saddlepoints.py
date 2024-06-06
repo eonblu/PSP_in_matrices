@@ -39,20 +39,17 @@ def BienstockBase(matrix, rows, CompsObj):
     while heap.size > 1: # done heapsize-1 times
         currentmax = heap.peekmax(CompsObj)
         currentmin = heap.peekmin(CompsObj)
-        if matrix[currentmin[1]][currentmax[2]] <= matrix[currentmin[1]][currentmin[2]] and matrix[currentmin[1]][currentmin[2]] <= matrix[currentmax[1]][currentmax[2]]:
-            CompsObj.increment(2)
+        # Check if A_il is smaller or equal than minimum
+        if matrix[currentmin[1]][currentmax[2]] <= currentmin[0]:
+            CompsObj.increment()
             heap.popmax(CompsObj)
-        elif matrix[currentmin[1]][currentmin[2]] <= matrix[currentmax[1]][currentmax[2]] and matrix[currentmax[1]][currentmax[2]] <= matrix[currentmin[1]][currentmax[2]]:
-            if matrix[currentmin[1]][currentmax[2]] <= matrix[currentmin[1]][currentmin[2]]: # required increment if considering lazy evaluation for first if case
-                CompsObj.increment()
-            CompsObj.increment(3)
+        # Check if A_il is larger or equal than maximum
+        elif currentmax[0] <= matrix[currentmin[1]][currentmax[2]]:
+            CompsObj.increment(2)
             heap.popmin(CompsObj)
+        # A_il needs be to in between min and max now, no need for a new comparison - this else if is just a sanity check
         elif matrix[currentmin[1]][currentmin[2]] < matrix[currentmin[1]][currentmax[2]] and matrix[currentmin[1]][currentmax[2]] < matrix[currentmax[1]][currentmax[2]]:
-            if matrix[currentmin[1]][currentmax[2]] <= matrix[currentmin[1]][currentmin[2]]: # required increment if considering lazy evaluation for first if case
-                CompsObj.increment()
-            if matrix[currentmin[1]][currentmin[2]] <= matrix[currentmax[1]][currentmax[2]]: # required increment if considering lazy evaluation for second if case
-                CompsObj.increment()
-            CompsObj.increment(4)
+            CompsObj.increment(2)
             heap.popmin(CompsObj)
             heap.popmax(CompsObj)
             heap.insert_triplet([matrix[currentmin[1]][currentmax[2]], currentmin[1], currentmax[2]], CompsObj)
@@ -66,15 +63,16 @@ def BienstockAlgorithm(matrix, rows, matrixid, CompsObj):
     # TODO: Confirm that final value is a saddlepoint
     UpdateResult(matrixid, "BienstockRes", CompsObj.value)
 
-def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
+def RecursiveBase(matrix, rows, CompsObj):
     # define the block size
     l = math.ceil(math.log(rows, 2))
-    # calculate the amount of rows in the auxiliry matrix, if case for no overlapping
+    # calculate the amount of rows in the auxiliary matrix, if case for no overlapping
     if rows % l == 0:
         aux_rows = math.floor(rows/l)
     else:
         aux_rows = math.floor(rows/l) + 1
     aux_heap = MinMaxHeap(aux_rows)
+
     original_position_dict = {}
     # add PSP along the diagonal besides the last block that may be overlapping
     for i in range(0, (aux_rows - 1)*l, l):
@@ -82,11 +80,11 @@ def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
         matrix_block = matrix[i:i+l, i:i+l]
         # find PSP of submatrix along the diagonal
         PSP = BienstockBase(matrix_block, len(matrix_block), CompsObj)
-        # store the original position instead of the auxilary position in the heap
+        # store the auxiliary position in the heap, store the real position in the dictionary
         aux_heap.insert_triplet([PSP[0], i//l, i//l], CompsObj)
         original_position_dict[(PSP[0], i//l, i//l)] = [PSP[0], PSP[1] + i, PSP[2] + i]
 
-    # add the final, possibly overlapping element of the original matrix, if necessary
+    # add the final, overlapping element of the original matrix, if there are leftover rows/columns, store aux position and real position
     m_rows, m_cols = matrix.shape
     if rows % l == 0:
         PSP = BienstockBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj)
@@ -94,43 +92,55 @@ def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
         original_position_dict[(PSP[0], aux_rows-1, aux_rows-1)] = [PSP[0], m_rows - l + PSP[1], m_rows - l + PSP[2]]
 
     while aux_heap.size > 1: # done heapsize-1 times
-        print(aux_heap.a)
         currentmax = aux_heap.peekmax(CompsObj)
         currentmin = aux_heap.peekmin(CompsObj)
         # now need to evaluate PSP of aux matrix at position A[i,l]
         matrix_block = []
         aux_i = currentmin[1]
         aux_l = currentmax[2]
+        # check if the min or the max are in the final block, that requires a different calculation of the real positions
         if aux_i == aux_rows-1:
             matrix_block = matrix[m_rows-l:m_rows, aux_l*l:(aux_l+1)*l]
             currentquery = BienstockBase(matrix_block, len(matrix_block), CompsObj)
-            new_value = [currentquery[0], m_rows - l + currentquery[1], aux_l*l + currentquery[2]]
+            new_dict_entry = [currentquery[0], m_rows - l + currentquery[1], aux_l*l + currentquery[2]]
         elif aux_l == aux_rows-1:
             matrix_block = matrix[(aux_i*l):(aux_i+1)*l, m_cols-l:m_cols]
             currentquery = BienstockBase(matrix_block, len(matrix_block), CompsObj)
-            new_value = [currentquery[0], aux_i*l + currentquery[1], m_cols - l + currentquery[2]]
-        # aux_i and aux_l cannot both be the maximum value as that is already in the heap from the start
+            new_dict_entry = [currentquery[0], aux_i*l + currentquery[1], m_cols - l + currentquery[2]]
+        # aux_i and aux_l cannot both be the maximum value as that is already in the heap from the start, can ignore that case
         else:
             matrix_block = matrix[(aux_i*l):(aux_i+1)*l, (aux_l*l):(aux_l+1)*l]
             currentquery = BienstockBase(matrix_block, len(matrix_block), CompsObj)
-            new_value = [currentquery[0], aux_i*l + currentquery[1], aux_l*l + currentquery[2]]
+            new_dict_entry = [currentquery[0], aux_i*l + currentquery[1], aux_l*l + currentquery[2]]
         
         # Apply same properties of H
+        # Check if A_il in the auxiliary matrix is smaller or equal than the minimum (at A_ij)
         if currentquery[0] <= currentmin[0]:
+            CompsObj.increment()
             aux_heap.popmax(CompsObj)
             del original_position_dict[(currentmax[0], currentmax[1], currentmax[2])]
+        # Check if A_il in the aux matrix is larger or equal than the maximum (at A_kl)
         elif currentmax[0] <= currentquery[0]:
+            CompsObj.increment(2)
             aux_heap.popmin(CompsObj)
             del original_position_dict[(currentmin[0], currentmin[1], currentmin[2])]
+        # A_il has to be between min and max, comparison here is only a sanity check
         elif currentmin[0] < currentquery[0] and currentquery[0] < currentmax[0]:
+            CompsObj.increment(2)
             aux_heap.popmax(CompsObj)
             del original_position_dict[(currentmax[0], currentmax[1], currentmax[2])]
             aux_heap.popmin(CompsObj)
             del original_position_dict[(currentmin[0], currentmin[1], currentmin[2])]
-            original_position_dict[(currentquery[0], aux_i, aux_l)] = new_value
+            original_position_dict[(currentquery[0], aux_i, aux_l)] = new_dict_entry
             aux_heap.insert_triplet([currentquery[0], aux_i, aux_l], CompsObj)
-    # UpdateResult(matrixid, "RecursiveRes", CompsObj.value)
+        else:
+            raise ValueError('There was an error in the heap structure')
     print(original_position_dict)
+
+def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
+    RecursiveBase(matrix, rows, CompsObj)
+    # TODO: Confirm that final value is a saddlepoint
+    UpdateResult(matrixid, "RecursiveRes", CompsObj.value)
 
 def UpdateResult(matrixid, field_name, result):
     try:
@@ -148,11 +158,10 @@ def UpdateResult(matrixid, field_name, result):
             conn.close()
 
 if __name__ == '__main__':
-    # CompsObjB = Comparisons()
-    # CompsObjR = Comparisons()
-    # matrix, rows, matrixid = retrieve_matrix(15)
-    # BienstockAlgorithm(matrix, rows, 15, CompsObjB)
-    # RecursiveAlgorithm(matrix, rows, 15, CompsObjR)
-    
-    # print(BienstockBase([[5,5],[3,3]], 2, Comparisons()))
+    CompsObjB = Comparisons()
+    CompsObjR = Comparisons()
+    matrix, rows, matrixid = retrieve_matrix(1)
+    BienstockAlgorithm(matrix, rows, 1, CompsObjB)
+    RecursiveAlgorithm(matrix, rows, 1, CompsObjR)
+    # print(BienstockBase([[3,5],[3,5]], 2, Comparisons()))
     # RecursiveAlgorithm(np.array([[6,5,5,5],[3,4,3,3],[3,5,4,4],[3,5,4,4]]), 4, 0, Comparisons())
