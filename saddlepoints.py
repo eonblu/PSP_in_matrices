@@ -24,7 +24,6 @@ def retrieve_matrix(matrix_id):
     result = cursor.fetchone()
 
     if result:
-        print (result)
         seed, rows = result
         matrix = create_matrix_with_ssp(seed, rows)
 
@@ -63,7 +62,9 @@ def BienstockAlgorithm(matrix, rows, matrixid, CompsObj):
     # TODO: Confirm that final value is a saddlepoint
     UpdateResult(matrixid, "BienstockRes", CompsObj.value)
 
-def RecursiveBase(matrix, rows, CompsObj):
+def RecursiveBase(matrix, rows, CompsObj, MultiRecursion): # MultiRecursion 0 : No extra Recursion, 1 : One extra Recursion, 2 : Recursion until block size is 8
+    # define the minimum block size for recursion base
+    min_l = 8
     # define the block size
     l = math.ceil(math.log(rows, 2))
     # calculate the amount of rows in the auxiliary matrix, if case for no overlapping
@@ -79,18 +80,29 @@ def RecursiveBase(matrix, rows, CompsObj):
         matrix_block = []
         matrix_block = matrix[i:i+l, i:i+l]
         # find PSP of submatrix along the diagonal
-        PSP = BienstockBase(matrix_block, len(matrix_block), CompsObj)
+        # if case depending on level of recursions
+        if MultiRecursion == 0 or l <= min_l:
+            PSP = BienstockBase(matrix_block, len(matrix_block), CompsObj)
+        elif MultiRecursion == 1:
+            PSP = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 0)[0]
+        elif MultiRecursion == 2:
+            PSP = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 2)[0]
         # store the auxiliary position in the heap, store the real position in the dictionary
         aux_heap.insert_triplet([PSP[0], i//l, i//l], CompsObj)
         original_position_dict[(PSP[0], i//l, i//l)] = [PSP[0], PSP[1] + i, PSP[2] + i]
 
     # add the final, possibly overlapping element of the original matrix, if there are leftover rows/columns, store aux position and real position
     m_rows, m_cols = matrix.shape
-    PSP = BienstockBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj)
+    # if case depending on level of recursion
+    if MultiRecursion == 0 or l <= min_l:
+        PSP = BienstockBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj)
+    elif MultiRecursion == 1:
+        PSP = RecursiveBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj, 0)[0]
+    elif MultiRecursion == 2:
+        PSP = RecursiveBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj, 2)[0]
     aux_heap.insert_triplet([PSP[0], aux_rows-1, aux_rows-1], CompsObj)
     original_position_dict[(PSP[0], aux_rows-1, aux_rows-1)] = [PSP[0], m_rows - l + PSP[1], m_rows - l + PSP[2]]
     
-    print(aux_heap.a)
     while aux_heap.size > 1: # done heapsize-1 times
         currentmax = aux_heap.peekmax(CompsObj)
         currentmin = aux_heap.peekmin(CompsObj)
@@ -101,18 +113,20 @@ def RecursiveBase(matrix, rows, CompsObj):
         # check if the min or the max are in the final block, that requires a different calculation of the real positions
         if aux_i == aux_rows-1:
             matrix_block = matrix[m_rows-l:m_rows, aux_l*l:(aux_l+1)*l]
-            currentquery = BienstockBase(matrix_block, len(matrix_block), CompsObj)
-            new_dict_entry = [currentquery[0], m_rows - l + currentquery[1], aux_l*l + currentquery[2]]
         elif aux_l == aux_rows-1:
             matrix_block = matrix[(aux_i*l):(aux_i+1)*l, m_cols-l:m_cols]
-            currentquery = BienstockBase(matrix_block, len(matrix_block), CompsObj)
-            new_dict_entry = [currentquery[0], aux_i*l + currentquery[1], m_cols - l + currentquery[2]]
-        # aux_i and aux_l cannot both be the maximum value as that is already in the heap from the start, can ignore that case
+        # aux_i and aux_l cannot both be the maximum value as that is already in the heap from the start, can ignore that case -> else is that it is neither max row nor max column
         else:
             matrix_block = matrix[(aux_i*l):(aux_i+1)*l, (aux_l*l):(aux_l+1)*l]
-            currentquery = BienstockBase(matrix_block, len(matrix_block), CompsObj)
-            new_dict_entry = [currentquery[0], aux_i*l + currentquery[1], aux_l*l + currentquery[2]]
         
+        # if case depending on level of recursion
+        if MultiRecursion == 0 or l <= min_l:
+            currentquery = BienstockBase(matrix_block, len(matrix_block), CompsObj)
+        elif MultiRecursion == 1:
+            currentquery = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 0)[0]
+        elif MultiRecursion == 2:
+            currentquery = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 2)[0]
+
         # Apply same properties of H
         # Check if A_il in the auxiliary matrix is smaller or equal than the minimum (at A_ij)
         if currentquery[0] <= currentmin[0]:
@@ -131,18 +145,41 @@ def RecursiveBase(matrix, rows, CompsObj):
             del original_position_dict[(currentmax[0], currentmax[1], currentmax[2])]
             aux_heap.popmin(CompsObj)
             del original_position_dict[(currentmin[0], currentmin[1], currentmin[2])]
+            # add original position to dictionary (depends on )
+            if aux_i == aux_rows-1:
+                new_dict_entry = [currentquery[0], m_rows - l + currentquery[1], aux_l*l + currentquery[2]]
+            elif aux_l == aux_rows-1:
+                new_dict_entry = [currentquery[0], aux_i*l + currentquery[1], m_cols - l + currentquery[2]]
+            else: # this else doesnt consider max row and max column since we should never consider that case
+                new_dict_entry = [currentquery[0], aux_i*l + currentquery[1], aux_l*l + currentquery[2]]
             original_position_dict[(currentquery[0], aux_i, aux_l)] = new_dict_entry
             aux_heap.insert_triplet([currentquery[0], aux_i, aux_l], CompsObj)
         else:
             raise ValueError('There was an error in the heap structure')
-    print("Dict - Auxiliary position:Real position",original_position_dict)
+    res = aux_heap.peekmin(CompsObj)
+    return [original_position_dict[res[0], res[1], res[2]], original_position_dict]
 
 def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
-    RecursiveBase(matrix, rows, CompsObj)
+    result = RecursiveBase(matrix, rows, CompsObj, 0)
+    print(result[1])
     # TODO: Confirm that final value is a saddlepoint
     UpdateResult(matrixid, "RecursiveRes", CompsObj.value)
 
+def TwoLevelRecursionAlgorithm(matrix, rows, matrixid, CompsObj):
+    result = RecursiveBase(matrix, rows, CompsObj, 1)
+    print(result[1])
+    # TODO: Confirm that final value is a saddlepoint
+    UpdateResult(matrixid, "TwoLevelRes", CompsObj.value)
+
+def MultiLevelRecursionAlgorithm(matrix, rows, matrixid, CompsObj):
+    result = RecursiveBase(matrix, rows, CompsObj, 2)
+    print(result[1])
+    # TODO: Confirm that final value is a saddlepoint
+    UpdateResult(matrixid, "MultiLevelRes", CompsObj.value)
+
 def UpdateResult(matrixid, field_name, result):
+    if matrixid == 0:
+        return
     try:
         conn = mysql_connection.new_connection()
         cursor = conn.cursor()
@@ -159,11 +196,13 @@ def UpdateResult(matrixid, field_name, result):
 
 if __name__ == '__main__':
     # CompsObjB = Comparisons()
-    # CompsObjR = Comparisons()
-    # matrix, rows, matrixid = retrieve_matrix(16)
+    CompsObjR = Comparisons()
+    matrix, rows, matrixid = retrieve_matrix(14)
     # BienstockAlgorithm(matrix, rows, 16, CompsObjB)
-    # RecursiveAlgorithm(matrix, rows, 16, CompsObjR)
+    # RecursiveAlgorithm(matrix, rows, 19, CompsObjR)
+    TwoLevelRecursionAlgorithm(matrix, rows, 14, CompsObjR)
+    # MultiLevelRecursionAlgorithm(matrix, rows, 17, CompsObjB)
     # print(BienstockBase([[3,5],[3,5]], 2, Comparisons()))
     
-    # RecursiveBase(np.array([[2,2,2,2,2,2,2,4],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[2,3,3,3,3,3,3,5],[1,0,0,0,0,0,0,5]]), 8, Comparisons())
-    # RecursiveBase(np.array([[1,1,1,2],[2,2,2,3],[3,3,3,3],[4,4,4,4]]), 4, Comparisons())
+    # RecursiveAlgorithm(np.array([[2,2,2,2,2,2,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,4,2],[1,0,0,0,0,0,5,4]]), 8, 0, Comparisons())
+    # RecursiveBase(np.array([[1,1,1,6],[2,2,2,6],[3,3,3,6],[4,4,4,5]]), 4, Comparisons(), 0)

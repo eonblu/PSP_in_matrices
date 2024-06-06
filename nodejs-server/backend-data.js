@@ -43,7 +43,7 @@ db.connect((err) => {
 let cachedData = [];
 
 const updateData = () => {
-    const query = 'SELECT MatrixID, MRows, BienstockRes, RecursiveRes FROM Matrices';
+    const query = 'SELECT MatrixID, MRows, BienstockRes, RecursiveRes, TwoLevelRes, MultiLevelRes FROM Matrices';
     db.query(query, (err, results) => {
         if (err) {
             console.error('Error fetching data:', err);
