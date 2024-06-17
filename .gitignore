@@ -6,8 +6,8 @@ auth.txt
 /Sources/cuckoo.pdf
 
 # Nodejs Server
-/nodejs-server
-/nodejs-server/backend-data.js
-/nodejs-server/package-lock.json
-/nodejs-server/package.json
+/nodejs-server_backup
+/nodejs-server_backup/backend-data.js
+/nodejs-server_backup/package-lock.json
+/nodejs-server_backup/package.json
 
