@@ -1,3 +1,13 @@
 #Python
 /__pycache__
 auth.txt
+
+# Sources
+/Sources/cuckoo.pdf
+
+# Nodejs Server
+/nodejs-server
+/nodejs-server/backend-data.js
+/nodejs-server/package-lock.json
+/nodejs-server/package.json
+

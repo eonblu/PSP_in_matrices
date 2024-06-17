@@ -52,7 +52,8 @@ def add_to_mysql_table(matrix, seed):
 
 
 if __name__ == '__main__':
-    seed = 2159
-    r = 150
-    matrix1 = create_matrix_with_ssp(seed, r)
-    add_to_mysql_table(matrix1, seed)
+    seed = 21592
+    r = 24
+    print(create_matrix_with_ssp(seed, r))
+    # matrix1 = create_matrix_with_ssp(seed, r)
+    # add_to_mysql_table(matrix1, seed)

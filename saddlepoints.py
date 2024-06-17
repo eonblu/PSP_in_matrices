@@ -195,13 +195,16 @@ def UpdateResult(matrixid, field_name, result):
             conn.close()
 
 if __name__ == '__main__':
-    # CompsObjB = Comparisons()
+    MID = 20
+    CompsObjB = Comparisons()
     CompsObjR = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(14)
-    # BienstockAlgorithm(matrix, rows, 16, CompsObjB)
-    # RecursiveAlgorithm(matrix, rows, 19, CompsObjR)
-    TwoLevelRecursionAlgorithm(matrix, rows, 14, CompsObjR)
-    # MultiLevelRecursionAlgorithm(matrix, rows, 17, CompsObjB)
+    CompsObjT = Comparisons()
+    CompsObjM = Comparisons()
+    matrix, rows, matrixid = retrieve_matrix(MID)
+    BienstockAlgorithm(matrix, rows, MID, CompsObjB)
+    RecursiveAlgorithm(matrix, rows, MID, CompsObjR)
+    TwoLevelRecursionAlgorithm(matrix, rows, MID, CompsObjT)
+    MultiLevelRecursionAlgorithm(matrix, rows, MID, CompsObjM)
     # print(BienstockBase([[3,5],[3,5]], 2, Comparisons()))
     
     # RecursiveAlgorithm(np.array([[2,2,2,2,2,2,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,4,2],[1,0,0,0,0,0,5,4]]), 8, 0, Comparisons())
