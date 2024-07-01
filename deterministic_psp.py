@@ -2,7 +2,6 @@
 import sys
 import numpy as np
 import mysql.connector as mysql
-import pickle
 import math
 
 import mysql_connection
