@@ -7,8 +7,6 @@ import copy
 
 import mysql_connection
 from matrices import *
-import MinMaxHeapTriplets
-from MinMaxHeapTriplets import *
 from QuickselectMinTriplets import *
 
 class Comparisons:
