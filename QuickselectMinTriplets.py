@@ -2,7 +2,8 @@ def partition(array, CompsObj, left, right):
     x = array[right] 
     # Could be randomized
     i = left 
-    for j in range(left, right):         
+    for j in range(left, right):
+        CompsObj.increment()         
         if array[j][0] <= x[0]: 
             array[i], array[j] = array[j], array[i]
             i += 1            
