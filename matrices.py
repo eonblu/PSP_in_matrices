@@ -50,6 +50,20 @@ def add_to_mysql_table(matrix, seed):
     cursor.close()
     mysql_connection.close_connection(conn)
 
+def retrieve_matrix(matrix_id):
+    conn = mysql_connection.new_connection()
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT MatrixSeed, MRows FROM Matrices WHERE MatrixID = %s", (matrix_id,))
+    result = cursor.fetchone()
+
+    if result:
+        seed, rows = result
+        matrix = create_matrix_with_ssp(seed, rows)
+
+    cursor.close()
+    mysql_connection.close_connection(conn)
+    return matrix, rows, matrix_id
 
 if __name__ == '__main__':
     seed = 21592
