@@ -48,8 +48,8 @@ def BienstockBase(matrix, rows, CompsObj):
         # A_il needs be to in between min and max now, no need for a new comparison - this else if is just a sanity check
         elif matrix[currentmin[1]][currentmin[2]] < matrix[currentmin[1]][currentmax[2]] and matrix[currentmin[1]][currentmax[2]] < matrix[currentmax[1]][currentmax[2]]:
             CompsObj.increment(2)
-            heap.popmin(CompsObj)
             heap.popmax(CompsObj)
+            heap.popmin(CompsObj)
             heap.insert_triplet([matrix[currentmin[1]][currentmax[2]], currentmin[1], currentmax[2]], CompsObj)
         else:
             raise ValueError('There was an error in the heap structure')
@@ -63,7 +63,7 @@ def BienstockAlgorithm(matrix, rows, matrixid, CompsObj):
 
 def RecursiveBase(matrix, rows, CompsObj, MultiRecursion): # MultiRecursion 0 : No extra Recursion, 1 : One extra Recursion, 2 : Recursion until block size is 8
     # define the minimum block size for recursion base
-    min_l = 8
+    min_l = 1
     # define the block size
     l = math.ceil(math.log(rows, 2))
     # calculate the amount of rows in the auxiliary matrix, if case for no overlapping
@@ -156,7 +156,7 @@ def RecursiveBase(matrix, rows, CompsObj, MultiRecursion): # MultiRecursion 0 : 
         else:
             raise ValueError('There was an error in the heap structure')
     res = aux_heap.peekmin(CompsObj)
-    return [original_position_dict[res[0], res[1], res[2]], original_position_dict]
+    return original_position_dict[res[0], res[1], res[2]]
 
 def RecursiveAlgorithm(matrix, rows, matrixid, CompsObj):
     result = RecursiveBase(matrix, rows, CompsObj, 0)
@@ -194,17 +194,7 @@ def UpdateResult(matrixid, field_name, result):
             conn.close()
 
 if __name__ == '__main__':
-    MID = 20
-    CompsObjB = Comparisons()
-    CompsObjR = Comparisons()
-    CompsObjT = Comparisons()
-    CompsObjM = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(MID)
-    BienstockAlgorithm(matrix, rows, MID, CompsObjB)
-    RecursiveAlgorithm(matrix, rows, MID, CompsObjR)
-    TwoLevelRecursionAlgorithm(matrix, rows, MID, CompsObjT)
-    MultiLevelRecursionAlgorithm(matrix, rows, MID, CompsObjM)
-    # print(BienstockBase([[3,5],[3,5]], 2, Comparisons()))
-    
-    # RecursiveAlgorithm(np.array([[2,2,2,2,2,2,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,5,5],[2,3,3,3,3,3,4,2],[1,0,0,0,0,0,5,4]]), 8, 0, Comparisons())
-    # RecursiveBase(np.array([[1,1,1,6],[2,2,2,6],[3,3,3,6],[4,4,4,5]]), 4, Comparisons(), 0)
+    matrix = create_matrix_with_ssp(97, 8)
+    print(matrix)
+    CompsObj = Comparisons()
+    print(RecursiveBase(matrix, len(matrix), CompsObj, 0))

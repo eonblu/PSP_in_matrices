@@ -32,12 +32,9 @@ def new_connection():
 
         if connection.is_connected():
             db_Info = connection.get_server_info()
-            print(f"Connected to MySQL Server version {db_Info}")
             cursor = connection.cursor()
             cursor.execute("select database();")
             record = cursor.fetchone()
-            print(f"You're connected to database: {record}")
-
     except Error as e:
         print("Error while connecting to MySQL: {e}")
     return connection
@@ -45,7 +42,6 @@ def new_connection():
 def close_connection(connection):
     if connection.is_connected():
         connection.close()
-        print("MySQL connection is closed")
 
 if __name__ == '__main__':
     conn = new_connection()

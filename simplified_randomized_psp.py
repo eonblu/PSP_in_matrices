@@ -43,7 +43,7 @@ def SimpleFindHorizontalPivot(matrix, s, CompsObj):
         R = []
         for sample in sample_pick:
             R.append([matrix[row, sample], row, sample])
-        setof_q_i.append(select_kth_triplet(R, s-1, CompsObj)) # math.ceil(s/2)
+        setof_q_i.append(select_kth_triplet(R, math.ceil(s/2), CompsObj)) # s-1 
     # pick minimum of medians
     min_q_i = setof_q_i[0]
     for q_i in setof_q_i:
@@ -66,7 +66,7 @@ def SimpleFindVerticalPivot(matrix, s, CompsObj):
         R = []
         for sample in sample_pick:
             R.append([matrix[sample, column], sample, column])
-        setof_q_i.append(select_kth_triplet(R, 2, CompsObj)) # math.ceil(s/2)
+        setof_q_i.append(select_kth_triplet(R, math.ceil(s/2), CompsObj)) # 2
     max_q_i = setof_q_i[0]
     for q_i in setof_q_i:
         CompsObj.increment()
@@ -98,5 +98,5 @@ if __name__ == '__main__':
     MID = 9
     CompsObjRandom = Comparisons()
     matrix, rows, matrixid = retrieve_matrix(MID)
-    print(SimpleReduceMatrix(matrix, 7, CompsObjRandom))
+    print(SimpleReduceMatrix(matrix, 5, CompsObjRandom))
     print(CompsObjRandom.value)

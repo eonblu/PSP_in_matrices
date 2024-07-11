@@ -43,14 +43,14 @@ def FindHorizontalPivot(matrix, CompsObj):
        
     # Phase 2 - the following for loop is the key difference between adjusted and proposed solution
     setof_q_r = []
-    s = 7
+    s = 5
     for rem in range(len(matrix)):
         if not rem in ignored_rows: # if row was removed in earlier step, ignore
             sample_pick = random.sample(range(len(matrix[0])), s)
             R = []
             for sample in sample_pick:
                 R.append([matrix[rem, sample], rem, sample])
-            setof_q_r.append(select_kth_triplet(R, s-1, CompsObj)) # math.ceil(s/2)
+            setof_q_r.append(select_kth_triplet(R, math.ceil(s/2), CompsObj)) # s-1
     p = setof_q_r[0]
     for q_r in setof_q_r: # select minimum
         CompsObj.increment()
@@ -86,14 +86,14 @@ def FindVerticalPivot(matrix, CompsObj):
 
     # Phase 2
     setof_q_r = []
-    s = 7
+    s = 5
     for rem in range(len(matrix[0])):
         if not rem in ignored_columns:
             sample_pick = random.sample(range(len(matrix)), s)
             R = []
             for sample in sample_pick:
                 R.append([matrix[sample, rem], sample, rem])
-            setof_q_r.append(select_kth_triplet(R, 2, CompsObj)) # math.ceil(s/2)
+            setof_q_r.append(select_kth_triplet(R, math.ceil(s/2), CompsObj)) # 2
     p = setof_q_r[0]
     for q_r in setof_q_r:
         CompsObj.increment()
@@ -123,6 +123,7 @@ def ReduceMatrix(matrix, s, CompsObj):
                     matrix = np.delete(matrix, row, 0)
         else:
             return "Failed"
+    print(matrix)
     return BienstockBase(matrix, s, CompsObj)[0]
 
 

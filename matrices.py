@@ -42,11 +42,23 @@ def add_to_mysql_table(matrix, seed):
     cursor = conn.cursor()
 
     cursor.execute(
-        "INSERT INTO Matrices (MatrixSeed, MRows, BienstockRes, RecursiveRes) VALUES (%s, %s, %s, %s)",
-        (seed, rows, 0, 0)
+        "INSERT INTO Matrices (MatrixSeed, MRows, BienstockRes, RecursiveRes, TwoLevelRes, MultiLevelRes) VALUES (%s, %s, %s, %s, %s, %s)",
+        (seed, rows, 0, 0, 0, 0)
     )
     conn.commit()
     print("Matrix stored with ID:", cursor.lastrowid)
+    cursor.close()
+    mysql_connection.close_connection(conn)
+
+def create_in_result_tables(table, rows, seed):
+    conn = mysql_connection.new_connection()
+    cursor = conn.cursor()
+    if table == "FindingMinL":
+        cursor.execute(
+            "INSERT INTO FindingMinL (MatrixSeed, MRows, BienstockRes, RecursiveRes) VALUES (%s, %s, %s, %s)",
+            (seed, rows, 0, 0)
+        )
+    conn.commit()
     cursor.close()
     mysql_connection.close_connection(conn)
 
