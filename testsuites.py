@@ -3,22 +3,17 @@ import sys
 import numpy as np
 import mysql.connector as mysql
 import math
+import matplotlib.pyplot as plt
+import statistics
 
 import mysql_connection
 from matrices import *
 from deterministic_psp import *
 
 def Testsuite2():
-    for seed in range(151, 200, 1):
-        create_in_result_tables("FindingMinL", 5, seed)
-        create_in_result_tables("FindingMinL", 6, seed)
-        create_in_result_tables("FindingMinL", 7, seed) 
-        create_in_result_tables("FindingMinL", 8, seed)
-        create_in_result_tables("FindingMinL", 9, seed)
-        create_in_result_tables("FindingMinL", 10, seed)
-        create_in_result_tables("FindingMinL", 11, seed)
-        create_in_result_tables("FindingMinL", 12, seed)
-        create_in_result_tables("FindingMinL", 13, seed)
+    for seed in range(1, 200, 1):
+        for rows in range(5, 19, 1):
+            create_in_result_tables("FindingMinL", rows, seed)
     result = FetchTestMatrices("FindingMinL")
     if result:
         for matrix_info in result:
@@ -37,12 +32,51 @@ def Testsuite2():
             else:
                 UpdateTestResult(matrixid, "FindingMinL", "RecursiveRes", CompsObjR.value)
 
+def Testsuite2Graph():
+    result = FetchTestMatrices("FindingMinL_results")
+    if result:
+        comp1_dict = {}
+        comp2_dict = {}
+        for row_count, comp1, comp2 in result:
+            if row_count not in comp1_dict:
+                comp1_dict[row_count] = []
+            if row_count not in comp2_dict:
+                comp2_dict[row_count] = []
+            comp1_dict[row_count].append(comp1)
+            comp2_dict[row_count].append(comp2)
+
+        sorted_keys = sorted(comp1_dict.keys())
+        comp1_data = [comp1_dict[key] for key in sorted_keys]
+        comp2_data = [comp2_dict[key] for key in sorted_keys]
+
+        fig, ax = plt.subplots(figsize=(10, 7))
+        positions1 = np.arange(len(sorted_keys)) * 2.0
+        positions2 = positions1 + 0.7
+
+        bp1 = ax.boxplot(comp1_data, positions=positions1, widths=0.6, patch_artist=True, boxprops=dict(facecolor="C0"), notch=True)
+        bp2 = ax.boxplot(comp2_data, positions=positions2, widths=0.6, patch_artist=True, boxprops=dict(facecolor="C1"), notch=True)
+
+        ax.set_xticks(positions1 + 0.35)
+        ax.set_xticklabels(sorted_keys)
+        ax.set_xlabel('Amount of Rows')
+        ax.set_ylabel('Comparisons')
+        ax.set_title('Boxplot of Comparisons by Amount of Rows')
+        handles = [bp1["boxes"][0], bp2["boxes"][0]]
+        labels = ["Bienstock", "Submatrices"]
+        ax.legend(handles, labels, loc='upper right', bbox_to_anchor=(0.2, 1))
+
+        plt.savefig('FindingMinL_results.png')
+
+
 def FetchTestMatrices(table):
     conn = mysql_connection.new_connection()
     cursor = conn.cursor()
 
     if table == "FindingMinL":
         cursor.execute("SELECT MatrixID, MatrixSeed, MRows FROM FindingMinL WHERE BienstockRes = 0 OR RecursiveRes = 0",)
+        result = cursor.fetchall()
+    if table == "FindingMinL_results":
+        cursor.execute("SELECT MRows, BienstockRes, RecursiveRes FROM FindingMinL WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0",)
         result = cursor.fetchall()
 
     cursor.close()
@@ -60,5 +94,7 @@ def UpdateTestResult(matrixid, table, field_name, result):
     cursor.close()
     conn.close()
 
+
+
 if __name__ == '__main__':
-    Testsuite2()
+    Testsuite2Graph()
