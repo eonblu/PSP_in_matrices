@@ -10,6 +10,55 @@ import mysql_connection
 from matrices import *
 from deterministic_psp import *
 
+def Testsuite1():
+    for rows in range(3, 13, 1):
+        AmountOfTestedMatrices = 500000
+        RandomMatricesWithSSP = 0
+        for seed in range(AmountOfTestedMatrices):
+            np.random.seed(seed)
+            matrix = np.random.randint(0, 10000*rows, size=(rows, rows))
+            PSP = BienstockBase(matrix, rows, Comparisons())
+            # confirm if PSP is SSP
+            PSP_is_SSP = True
+            for column in range(rows):
+                if column != PSP[2] and matrix[PSP[1]][column] >= PSP[0]:
+                    PSP_is_SSP = False
+            for row in range(rows):
+                if row != PSP[1] and matrix[row][PSP[2]] <= PSP[0]:
+                    PSP_is_SSP = False
+            if PSP_is_SSP:
+                RandomMatricesWithSSP += 1
+        
+        conn = mysql_connection.new_connection()
+        cursor = conn.cursor()
+        cursor.execute(
+            "INSERT INTO SSPinRandomMatrices (MRows, MatricesWithSSP, NumberOfTestedMatrices) VALUES (%s, %s, %s)",
+            (rows, RandomMatricesWithSSP, AmountOfTestedMatrices)
+        )
+        conn.commit()
+        cursor.close()
+        mysql_connection.close_connection(conn)       
+
+def Testsuite1Graph():
+    result = FetchTestMatrices("SSPinRandomMatrices")
+    if result:
+        MRows = [item[0] for item in result]
+        x_values = [item[1] / item[2] for item in result]
+        conjecture_values = [math.factorial(entry)*math.factorial(entry)/math.factorial(2*entry-1) for entry in MRows]
+
+        plt.figure(figsize=(6, 6))
+        line1 = plt.plot(MRows, x_values, marker='o', linestyle=':', color='r')
+        line2 = plt.plot(MRows, conjecture_values, marker='x', linestyle=':', color='b')
+
+        plt.xlabel('# Matrix Rows')
+        plt.ylabel('# Matrices with SSP / # Matrices tested')
+        plt.grid(True)
+        plt.ylim(bottom=-0.001)
+        plt.xlim(left=MRows[0], right=MRows[-1])
+        plt.legend([line1[0], line2[0]], ["Test Results", "n! * m! / (n + m -1)!"])
+
+        plt.savefig('RandomMatricesWithSSP.png')
+
 def Testsuite2():
     for seed in range(1, 200, 1):
         for rows in range(5, 19, 1):
@@ -61,9 +110,7 @@ def Testsuite2Graph():
         ax.set_xlabel('Amount of Rows')
         ax.set_ylabel('Comparisons')
         ax.set_title('Boxplot of Comparisons by Amount of Rows')
-        handles = [bp1["boxes"][0], bp2["boxes"][0]]
-        labels = ["Bienstock", "Submatrices"]
-        ax.legend(handles, labels, loc='upper right', bbox_to_anchor=(0.2, 1))
+        ax.legend([bp1["boxes"][0], bp2["boxes"][0]], ["Bienstock", "Submatrices"], loc='upper right', bbox_to_anchor=(0.2, 1))
 
         plt.savefig('FindingMinL_results.png')
 
@@ -77,6 +124,9 @@ def FetchTestMatrices(table):
         result = cursor.fetchall()
     if table == "FindingMinL_results":
         cursor.execute("SELECT MRows, BienstockRes, RecursiveRes FROM FindingMinL WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0",)
+        result = cursor.fetchall()
+    if table == "SSPinRandomMatrices":
+        cursor.execute("SELECT * FROM SSPinRandomMatrices",)
         result = cursor.fetchall()
 
     cursor.close()
@@ -97,4 +147,4 @@ def UpdateTestResult(matrixid, table, field_name, result):
 
 
 if __name__ == '__main__':
-    Testsuite2Graph()
+    Testsuite1Graph()
