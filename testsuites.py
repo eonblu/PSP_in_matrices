@@ -57,7 +57,7 @@ def Testsuite1Graph():
         plt.xlim(left=MRows[0], right=MRows[-1])
         plt.legend([line1[0], line2[0]], ["Test Results", "n! * m! / (n + m -1)!"])
 
-        plt.savefig('RandomMatricesWithSSP.png')
+        plt.savefig('ResultGraphs/RandomMatricesWithSSP.png')
 
 def Testsuite2():
     for seed in range(1, 200, 1):
@@ -112,7 +112,7 @@ def Testsuite2Graph():
         ax.set_title('Boxplot of Comparisons by Amount of Rows')
         ax.legend([bp1["boxes"][0], bp2["boxes"][0]], ["Bienstock", "Submatrices"], loc='upper right', bbox_to_anchor=(0.2, 1))
 
-        plt.savefig('FindingMinL_results.png')
+        plt.savefig('ResultGraphs/FindingMinL_results.png')
 
 
 def FetchTestMatrices(table):
@@ -147,4 +147,4 @@ def UpdateTestResult(matrixid, table, field_name, result):
 
 
 if __name__ == '__main__':
-    Testsuite1Graph()
+    Testsuite2Graph()
