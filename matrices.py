@@ -58,6 +58,11 @@ def create_in_result_tables(table, rows, seed):
             "INSERT INTO FindingMinL (MatrixSeed, MRows, BienstockRes, RecursiveRes) VALUES (%s, %s, %s, %s)",
             (seed, rows, 0, 0)
         )
+    elif table == "BienstockDallantGeneral":
+        cursor.execute(
+            "INSERT INTO BienstockDallantGeneral (MatrixSeed, MRows, BienstockRes, RecursiveRes) VALUES (%s, %s, %s, %s)",
+            (seed, rows, 0, 0)
+        )
     conn.commit()
     cursor.close()
     mysql_connection.close_connection(conn)

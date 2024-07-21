@@ -4,11 +4,11 @@ auth.txt
 random_notes.txt
 
 # Sources
-/Sources/cuckoo.pdf
+/Sources/*
 
 # Nodejs Server
 /nodejs-server_backup
 /nodejs-server_backup/backend-data.js
 /nodejs-server_backup/package-lock.json
 /nodejs-server_backup/package.json
-
+/nohup.out

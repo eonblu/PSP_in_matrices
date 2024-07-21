@@ -5,12 +5,13 @@ import mysql.connector as mysql
 import math
 import matplotlib.pyplot as plt
 import statistics
+from collections import defaultdict
 
 import mysql_connection
 from matrices import *
 from deterministic_psp import *
 
-def Testsuite1():
+def Testsuite1(): # Chance of SSP in Random Matrices
     for rows in range(3, 13, 1):
         AmountOfTestedMatrices = 500000
         RandomMatricesWithSSP = 0
@@ -46,7 +47,7 @@ def Testsuite1Graph():
         x_values = [item[1] / item[2] for item in result]
         conjecture_values = [math.factorial(entry)*math.factorial(entry)/math.factorial(2*entry-1) for entry in MRows]
 
-        plt.figure(figsize=(6, 6))
+        plt.figure(figsize=(8, 4))
         line1 = plt.plot(MRows, x_values, marker='o', linestyle=':', color='r')
         line2 = plt.plot(MRows, conjecture_values, marker='x', linestyle=':', color='b')
 
@@ -59,7 +60,7 @@ def Testsuite1Graph():
 
         plt.savefig('ResultGraphs/RandomMatricesWithSSP.png')
 
-def Testsuite2():
+def Testsuite2(): # Bienstock vs Dallant small matrices
     for seed in range(1, 200, 1):
         for rows in range(5, 19, 1):
             create_in_result_tables("FindingMinL", rows, seed)
@@ -98,7 +99,7 @@ def Testsuite2Graph():
         comp1_data = [comp1_dict[key] for key in sorted_keys]
         comp2_data = [comp2_dict[key] for key in sorted_keys]
 
-        fig, ax = plt.subplots(figsize=(10, 7))
+        fig, ax = plt.subplots(figsize=(10, 5))
         positions1 = np.arange(len(sorted_keys)) * 2.0
         positions2 = positions1 + 0.7
 
@@ -114,6 +115,57 @@ def Testsuite2Graph():
 
         plt.savefig('ResultGraphs/FindingMinL_results.png')
 
+def Testsuite3(): # Bienstock vs Dallant general
+    # Prerequisite: CREATE TABLE BienstockDallantGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int);
+    for seed in range(1, 201, 1):
+        for rows in range(500, 10001, 500):
+            create_in_result_tables("BienstockDallantGeneral", rows, seed)
+    result = FetchTestMatrices("BienstockDallantGeneral")
+    if result:
+        for matrix_info in result:
+            sys.stdout.flush()
+            matrixid, seed, rows = matrix_info
+            matrix = create_matrix_with_ssp(seed, rows)
+            CompsObjB = Comparisons()
+            CompsObjR = Comparisons()
+            PSP = BienstockBase(matrix, rows, CompsObjB)
+            if PSP[0] != rows:
+                print("Error in calculation of PSP")
+            else:
+                UpdateTestResult(matrixid, "BienstockDallantGeneral", "BienstockRes", CompsObjB.value)
+            PSP = RecursiveBase(matrix, rows, CompsObjR, 0)
+            if PSP[0] != rows:
+                print("Error in calculation of PSP")
+            else:
+                UpdateTestResult(matrixid, "BienstockDallantGeneral", "RecursiveRes", CompsObjR.value)
+
+def Testsuite3Graph():
+    result = FetchTestMatrices("BienstockDallantGeneral_results")
+    if result:
+        grouped_data = defaultdict(list)
+        for row, res1, res2 in result:
+            grouped_data[row].append((res1, res2))
+
+        rows = sorted(grouped_data.keys())
+        result1 = [np.mean([res1 for res1, res2 in grouped_data[row]]) for row in rows]
+        result2 = [np.mean([res2 for res1, res2 in grouped_data[row]]) for row in rows]
+
+        plt.figure(figsize=(10, 6))
+
+        line1 = plt.plot(rows, result1, linestyle='-', color='r', marker='')
+        line2 = plt.plot(rows, result2, linestyle='-', color='b', marker='')
+
+        plt.ylim(bottom=0)
+        plt.xlim(left=rows[0], right=rows[-1])
+        plt.yticks([0,100000,200000,300000,400000,500000],["0","10⁵","2*10⁵","3*10⁵","4*10⁵","5*10⁵"])
+        plt.xticks([500,2000,4000,6000,8000,10000],["500","2000","4000","6000","8000","10000"])
+
+        plt.xlabel('# Matrix Rows')
+        plt.ylabel('# Comparisons made to find PSP')
+        plt.grid(True)
+        plt.legend([line1[0], line2[0]], ["Bienstock", "Dallant"])
+
+        plt.savefig('ResultGraphs/BienstockDallantGeneral.png')
 
 def FetchTestMatrices(table):
     conn = mysql_connection.new_connection()
@@ -122,10 +174,16 @@ def FetchTestMatrices(table):
     if table == "FindingMinL":
         cursor.execute("SELECT MatrixID, MatrixSeed, MRows FROM FindingMinL WHERE BienstockRes = 0 OR RecursiveRes = 0",)
         result = cursor.fetchall()
-    if table == "FindingMinL_results":
+    elif table == "FindingMinL_results":
         cursor.execute("SELECT MRows, BienstockRes, RecursiveRes FROM FindingMinL WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0",)
         result = cursor.fetchall()
-    if table == "SSPinRandomMatrices":
+    elif table == "BienstockDallantGeneral":
+        cursor.execute("SELECT MatrixID, MatrixSeed, MRows FROM BienstockDallantGeneral WHERE BienstockRes = 0 OR RecursiveRes = 0",)
+        result = cursor.fetchall()
+    elif table == "BienstockDallantGeneral_results":
+        cursor.execute("SELECT MRows, BienstockRes, RecursiveRes FROM BienstockDallantGeneral WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0",)
+        result = cursor.fetchall()
+    elif table == "SSPinRandomMatrices":
         cursor.execute("SELECT * FROM SSPinRandomMatrices",)
         result = cursor.fetchall()
 
@@ -140,11 +198,12 @@ def UpdateTestResult(matrixid, table, field_name, result):
         update_query = f"UPDATE FindingMinL SET {field_name} = %s WHERE MatrixID = %s"
         cursor.execute(update_query, (result, matrixid))
         conn.commit()
-
+    elif table == "BienstockDallantGeneral":
+        update_query = f"UPDATE BienstockDallantGeneral SET {field_name} = %s WHERE MatrixID = %s"
+        cursor.execute(update_query, (result, matrixid))
+        conn.commit()
     cursor.close()
     conn.close()
 
-
-
 if __name__ == '__main__':
-    Testsuite2Graph()
+    Testsuite3Graph()
