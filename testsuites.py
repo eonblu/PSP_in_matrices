@@ -150,7 +150,7 @@ def Testsuite3Graph():
         result1 = [np.mean([res1 for res1, res2 in grouped_data[row]]) for row in rows]
         result2 = [np.mean([res2 for res1, res2 in grouped_data[row]]) for row in rows]
 
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=(8, 4))
 
         line1 = plt.plot(rows, result1, linestyle='-', color='r', marker='')
         line2 = plt.plot(rows, result2, linestyle='-', color='b', marker='')
@@ -162,7 +162,7 @@ def Testsuite3Graph():
 
         plt.xlabel('# Matrix Rows')
         plt.ylabel('# Comparisons made to find PSP')
-        plt.grid(True)
+        plt.grid(False)
         plt.legend([line1[0], line2[0]], ["Bienstock", "Dallant"])
 
         plt.savefig('ResultGraphs/BienstockDallantGeneral.png')
