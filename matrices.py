@@ -63,6 +63,11 @@ def create_in_result_tables(table, rows, seed):
             "INSERT INTO BienstockDallantGeneral (MatrixSeed, MRows, BienstockRes, RecursiveRes) VALUES (%s, %s, %s, %s)",
             (seed, rows, 0, 0)
         )
+    elif table == "BienstockDallantTwoLevelGeneral":
+        cursor.execute(
+            "INSERT INTO BienstockDallantTwoLevelGeneral (MatrixSeed, MRows, BienstockRes, RecursiveRes, TwoLevelRes) VALUES (%s, %s, %s, %s, %s)",
+            (seed, rows, 0, 0, 0)
+        )
     conn.commit()
     cursor.close()
     mysql_connection.close_connection(conn)

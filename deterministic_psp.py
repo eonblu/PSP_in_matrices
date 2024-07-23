@@ -63,7 +63,7 @@ def BienstockAlgorithm(matrix, rows, matrixid, CompsObj):
 
 def RecursiveBase(matrix, rows, CompsObj, MultiRecursion): # MultiRecursion 0 : No extra Recursion, 1 : One extra Recursion, 2 : Recursion until block size is 8
     # define the minimum block size for recursion base
-    min_l = 1
+    min_l = 10
     # define the block size
     l = math.ceil(math.log(rows, 2))
     # calculate the amount of rows in the auxiliary matrix, if case for no overlapping
@@ -83,9 +83,9 @@ def RecursiveBase(matrix, rows, CompsObj, MultiRecursion): # MultiRecursion 0 : 
         if MultiRecursion == 0 or l <= min_l:
             PSP = BienstockBase(matrix_block, len(matrix_block), CompsObj)
         elif MultiRecursion == 1:
-            PSP = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 0)[0]
+            PSP = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 0)
         elif MultiRecursion == 2:
-            PSP = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 2)[0]
+            PSP = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 2)
         # store the auxiliary position in the heap, store the real position in the dictionary
         aux_heap.insert_triplet([PSP[0], i//l, i//l], CompsObj)
         original_position_dict[(PSP[0], i//l, i//l)] = [PSP[0], PSP[1] + i, PSP[2] + i]
@@ -96,9 +96,9 @@ def RecursiveBase(matrix, rows, CompsObj, MultiRecursion): # MultiRecursion 0 : 
     if MultiRecursion == 0 or l <= min_l:
         PSP = BienstockBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj)
     elif MultiRecursion == 1:
-        PSP = RecursiveBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj, 0)[0]
+        PSP = RecursiveBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj, 0)
     elif MultiRecursion == 2:
-        PSP = RecursiveBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj, 2)[0]
+        PSP = RecursiveBase(matrix[m_rows-l:m_rows, m_cols-l:m_cols], l, CompsObj, 2)
     aux_heap.insert_triplet([PSP[0], aux_rows-1, aux_rows-1], CompsObj)
     original_position_dict[(PSP[0], aux_rows-1, aux_rows-1)] = [PSP[0], m_rows - l + PSP[1], m_rows - l + PSP[2]]
     
@@ -122,9 +122,9 @@ def RecursiveBase(matrix, rows, CompsObj, MultiRecursion): # MultiRecursion 0 : 
         if MultiRecursion == 0 or l <= min_l:
             currentquery = BienstockBase(matrix_block, len(matrix_block), CompsObj)
         elif MultiRecursion == 1:
-            currentquery = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 0)[0]
+            currentquery = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 0)
         elif MultiRecursion == 2:
-            currentquery = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 2)[0]
+            currentquery = RecursiveBase(matrix_block, len(matrix_block), CompsObj, 2)
 
         # Apply same properties of H
         # Check if A_il in the auxiliary matrix is smaller or equal than the minimum (at A_ij)
@@ -194,7 +194,7 @@ def UpdateResult(matrixid, field_name, result):
             conn.close()
 
 if __name__ == '__main__':
-    matrix = create_matrix_with_ssp(97, 8)
+    matrix = create_matrix_with_ssp(97, 132000)
     print(matrix)
     CompsObj = Comparisons()
-    print(RecursiveBase(matrix, len(matrix), CompsObj, 0))
+    print(RecursiveBase(matrix, len(matrix), CompsObj, 2))

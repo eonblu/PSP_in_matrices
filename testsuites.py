@@ -167,6 +167,67 @@ def Testsuite3Graph():
 
         plt.savefig('ResultGraphs/BienstockDallantGeneral.png')
 
+def Testsuite4(): # Bienstock vs Dallant vs TwoLevelRecursion general
+    # Prerequisite: CREATE TABLE BienstockDallantTwoLevelGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int, TwoLevelRes int);
+    for seed in range(201, 221, 1):
+        for rows in range(500, 10001, 100):
+            create_in_result_tables("BienstockDallantTwoLevelGeneral", rows, seed)
+    result = FetchTestMatrices("BienstockDallantTwoLevelGeneral")
+    if result:
+        for matrix_info in result:
+            sys.stdout.flush()
+            matrixid, seed, rows = matrix_info
+            matrix = create_matrix_with_ssp(seed, rows)
+            CompsObjB = Comparisons()
+            CompsObjR = Comparisons()
+            CompsObjT = Comparisons()
+            PSP = BienstockBase(matrix, rows, CompsObjB)
+            if PSP[0] != rows:
+                print("Error in calculation of PSP")
+            else:
+                UpdateTestResult(matrixid, "BienstockDallantTwoLevelGeneral", "BienstockRes", CompsObjB.value)
+            PSP = RecursiveBase(matrix, rows, CompsObjR, 0)
+            if PSP[0] != rows:
+                print("Error in calculation of PSP")
+            else:
+                UpdateTestResult(matrixid, "BienstockDallantTwoLevelGeneral", "RecursiveRes", CompsObjR.value)
+            PSP = RecursiveBase(matrix, rows, CompsObjT, 2)
+            if PSP[0] != rows:
+                print("Error in calculation of PSP")
+            else:
+                UpdateTestResult(matrixid, "BienstockDallantTwoLevelGeneral", "TwoLevelRes", CompsObjT.value)
+
+def Testsuite4Graph():
+    result = FetchTestMatrices("BienstockDallantTwoLevelGeneral_results")
+    if result:
+        grouped_data = defaultdict(list)
+        for row, res1, res2, res3 in result:
+            grouped_data[row].append((res1, res2, res3))
+
+        rows = sorted(grouped_data.keys())
+        result1 = [np.mean([res1 for res1, res2, res3 in grouped_data[row]]) for row in rows]
+        result2 = [np.mean([res2 for res1, res2, res3 in grouped_data[row]]) for row in rows]
+        result3 = [np.mean([res3 for res1, res2, res3 in grouped_data[row]]) for row in rows]
+
+        plt.figure(figsize=(8, 4))
+
+        line1 = plt.plot(rows, result1, linestyle='-', color='r', marker='')
+        line2 = plt.plot(rows, result2, linestyle='-', color='b', marker='')
+        line3 = plt.plot(rows, result3, linestyle='-', color='g', marker='')
+
+        plt.ylim(bottom=0)
+        plt.xlim(left=rows[0], right=rows[-1])
+        plt.yticks([0,100000,200000,300000,400000,500000],["0","10⁵","2*10⁵","3*10⁵","4*10⁵","5*10⁵"])
+        plt.xticks([500,2000,4000,6000,8000,10000],["500","2000","4000","6000","8000","10000"])
+
+        plt.xlabel('# Matrix Rows')
+        plt.ylabel('# Comparisons made to find PSP')
+        plt.grid(False)
+        plt.legend([line1[0], line2[0], line3[0]], ["Bienstock", "Dallant", "Two Level Dallant"])
+
+        plt.savefig('ResultGraphs/BienstockDallantTwoLevelGeneral.png')
+
+            
 def FetchTestMatrices(table):
     conn = mysql_connection.new_connection()
     cursor = conn.cursor()
@@ -182,6 +243,12 @@ def FetchTestMatrices(table):
         result = cursor.fetchall()
     elif table == "BienstockDallantGeneral_results":
         cursor.execute("SELECT MRows, BienstockRes, RecursiveRes FROM BienstockDallantGeneral WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0",)
+        result = cursor.fetchall()
+    elif table == "BienstockDallantTwoLevelGeneral":
+        cursor.execute("SELECT MatrixID, MatrixSeed, MRows FROM BienstockDallantTwoLevelGeneral WHERE BienstockRes = 0 OR RecursiveRes = 0 OR TwoLevelRes = 0",)
+        result = cursor.fetchall()
+    elif table == "BienstockDallantTwoLevelGeneral_results":
+        cursor.execute("SELECT MRows, BienstockRes, RecursiveRes, TwoLevelRes FROM BienstockDallantTwoLevelGeneral WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0 AND NOT TwoLevelRes = 0",)
         result = cursor.fetchall()
     elif table == "SSPinRandomMatrices":
         cursor.execute("SELECT * FROM SSPinRandomMatrices",)
@@ -202,8 +269,12 @@ def UpdateTestResult(matrixid, table, field_name, result):
         update_query = f"UPDATE BienstockDallantGeneral SET {field_name} = %s WHERE MatrixID = %s"
         cursor.execute(update_query, (result, matrixid))
         conn.commit()
+    elif table == "BienstockDallantTwoLevelGeneral":
+        update_query = f"UPDATE BienstockDallantTwoLevelGeneral SET {field_name} = %s WHERE MatrixID = %s"
+        cursor.execute(update_query, (result, matrixid))
+        conn.commit()
     cursor.close()
     conn.close()
 
 if __name__ == '__main__':
-    Testsuite3Graph()
+    Testsuite4Graph()
