@@ -4,6 +4,7 @@ import numpy as np
 import mysql.connector as mysql
 import math
 import copy
+import random
 
 import mysql_connection
 from matrices import *
@@ -25,7 +26,7 @@ def FindHorizontalPivot(matrix, CompsObj):
         setof_q_i = []
         for i in range(len(matrix)):
             if not i in ignored_rows: # if row was removed in earlier run of this loop
-                rand_k = np.random.randint(0, len(matrix[0]))
+                rand_k = random.randint(0, len(matrix[0])-1)
                 setof_q_i.insert(len(setof_q_i), ([matrix[i][rand_k], i, rand_k]))
         # the array in select_kth_triplet is modified, so there needs to be an auxiliary array as the ordered array is still required
         aux_setof_q_i = copy.deepcopy(setof_q_i)
@@ -40,20 +41,22 @@ def FindHorizontalPivot(matrix, CompsObj):
     setof_q_r = []
     for rem in range(len(matrix)):
         if not rem in ignored_rows: # if row was removed in earlier step, ignore
-            rand_k = np.random.randint(0, len(matrix[0])) # this should pick |m|^1/20 elements, realistically always 1 for matrices generated with numpy
+            rand_k = random.randint(0, len(matrix[0])-1) # this should pick |m|^1/20 elements, realistically always 1 for matrices generated with numpy
             setof_q_r.append([matrix[rem][rand_k], rem, rand_k])
     p = setof_q_r[0]
     for q_r in setof_q_r: # select minimum
         CompsObj.increment()
         if q_r[0] < p[0]:
             p = q_r
-    for j in range(len(matrix[p[1]])):
-        CompsObj.increment()
+    for j in range(len(matrix[0])):
+        CompsObj.increment() # Comparison to check for p > k/4 entries - this could be removed if we trust that we remove "enough" columns
         if p[0] > matrix[p[1], j]:
             columns_to_remove.append(j)
-    if larger_count < math.floor(len(matrix[p[1]])/4):
-        print("Larger count failed:", len(columns_to_remove))
-        return False, []
+    if p[0] > t:
+        return False, [-1]
+    elif len(columns_to_remove) < math.floor(len(matrix[0])/4): # soft failure
+        print(p)
+        return False, columns_to_remove
     else:
         return p, columns_to_remove
 
@@ -67,7 +70,7 @@ def FindVerticalPivot(matrix, CompsObj):
         setof_q_i = []
         for i in range(len(matrix[0])):
             if not i in ignored_columns:
-                rand_k = np.random.randint(0, len(matrix))
+                rand_k = random.randint(0, len(matrix)-1)
                 setof_q_i.insert(len(setof_q_i), ([matrix[rand_k][i], rand_k, i]))
         aux_setof_q_i = copy.deepcopy(setof_q_i)
         q_selected = select_kth_triplet(aux_setof_q_i, max(math.floor((1/4) * len(setof_q_i)), 1), CompsObj)
@@ -81,47 +84,62 @@ def FindVerticalPivot(matrix, CompsObj):
     setof_q_r = []
     for rem in range(len(matrix[0])):
         if not rem in ignored_columns:
-            rand_k = np.random.randint(0, len(matrix))
+            rand_k = random.randint(0, len(matrix)-1)
             setof_q_r.append([matrix[rand_k][rem], rand_k, rem])
     p = setof_q_r[0]
     for q_r in setof_q_r:
         CompsObj.increment()
         if q_r[0] > p[0]:
             p = q_r
-    for j in range(len(matrix[:,p[2]])):
+    for j in range(len(matrix)):
         CompsObj.increment()
         if p[0] < matrix[j, p[2]]:
             rows_to_remove.append(j)
-    if smaller_count < math.floor(len(matrix[p[2]])/4):
-        print("Smaller count failed:", len(rows_to_remove))
-        return False, []
+    if p[0] < t:
+        return False, [-1]
+    elif len(rows_to_remove) < math.floor(len(matrix)/4):
+        print(p)
+        return False, rows_to_remove
     else:
         return p, rows_to_remove
 
-def ReduceMatrix(matrix, s, CompsObj):
-    while len(matrix) > s or len(matrix[0]) > s:
+def ReduceMatrix(matrix, CompsObj):
+    while len(matrix) > 10 or len(matrix[0]) > 10:
         print(matrix.shape)
-        if len(matrix[0]) > s: # Prevent unecessary comparisons if one dimension is already minimal size
+        if len(matrix[0]) > 10: # Prevent unecessary comparisons if one dimension is already minimal size
             p_hor, columns_to_remove = FindHorizontalPivot(matrix, CompsObj)
-        if len(matrix) > s:
+        if len(matrix) > 10:
             p_ver, rows_to_remove = FindVerticalPivot(matrix, CompsObj)
         if p_hor and p_ver:
             for col in reversed(columns_to_remove):
-                if len(matrix[0]) > s: # Prevent Non square final matrix
+                if len(matrix[0]) > 10: # Prevent Non square final matrix
                     matrix = np.delete(matrix, col, 1)
             for row in reversed(rows_to_remove):
-                if len(matrix) > s:
+                if len(matrix) > 10:
                     matrix = np.delete(matrix, row, 0)
         else:
             return "Failed"
-    return BienstockBase(matrix, s, CompsObj)[0]
+    return BienstockBase(matrix, 10, CompsObj)[0]
 
+def ReduceMatrixTestsuite(matrix, CompsObj):
+    if len(matrix[0]) > 10: # Prevent unecessary comparisons if one dimension is already minimal size
+        p_hor, columns_to_remove = FindHorizontalPivot(matrix, CompsObj)
+    if len(matrix) > 10:
+        p_ver, rows_to_remove = FindVerticalPivot(matrix, CompsObj)
+    if p_hor and p_ver:
+        for col in reversed(columns_to_remove):
+            if len(matrix[0]) > 10: # Prevent Non square final matrix
+                matrix = np.delete(matrix, col, 1)
+        for row in reversed(rows_to_remove):
+            if len(matrix) > 10:
+                matrix = np.delete(matrix, row, 0)
+    else:
+        return [columns_to_remove, rows_to_remove]
 
 if __name__ == '__main__':
     MID = 13
     CompsObjRandom = Comparisons()
     matrix, rows, matrixid = retrieve_matrix(MID)
-    print(ReduceMatrix(matrix, 7, CompsObjRandom))
-    print(CompsObjRandom.value)
+    print(ReduceMatrixTestsuite(matrix, CompsObjRandom))
 
     

@@ -8,7 +8,7 @@ import mysql_connection
 def create_matrix_with_ssp(random_seed, rows):
     #set seed, to create consistent results, as the matrix itself wont be stored
     np.random.seed(random_seed+rows)
-    matrix = np.random.randint(0, 2*rows, size=(rows, rows))
+    matrix = np.random.randint(0, 2*rows, size=(rows, rows), dtype="uint32")
     #pick (pseudo) random position for saddle point
     ssp_row = np.random.randint(0, rows)
     ssp_column = np.random.randint(0, rows)
@@ -66,6 +66,16 @@ def create_in_result_tables(table, rows, seed):
     elif table == "BienstockDallantTwoLevelGeneral":
         cursor.execute(
             "INSERT INTO BienstockDallantTwoLevelGeneral (MatrixSeed, MRows, BienstockRes, RecursiveRes, TwoLevelRes) VALUES (%s, %s, %s, %s, %s)",
+            (seed, rows, 0, 0, 0)
+        )
+    elif table == "RandomizedPSPLargerSmaller":
+        cursor.execute(
+            "INSERT INTO RandomizedPSPLargerSmaller (MatrixSeed, MRows, LargerCount, SmallerCount) VALUES (%s, %s, %s, %s)",
+            (seed, rows, 0, 0)
+        )
+    elif table == "AdjustedRandomizedPSPLargerSmaller":
+        cursor.execute(
+            "INSERT INTO AdjustedRandomizedPSPLargerSmaller (MatrixSeed, MRows, LargerCount, SmallerCount, HardFailures) VALUES (%s, %s, %s, %s, %s)",
             (seed, rows, 0, 0, 0)
         )
     conn.commit()
