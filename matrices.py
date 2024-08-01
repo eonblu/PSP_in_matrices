@@ -78,6 +78,16 @@ def create_in_result_tables(table, rows, seed):
             "INSERT INTO AdjustedRandomizedPSPLargerSmaller (MatrixSeed, MRows, LargerCount, SmallerCount, HardFailures) VALUES (%s, %s, %s, %s, %s)",
             (seed, rows, 0, 0, 0)
         )
+    elif table == "SAdjustedRandomizedPSPLargerSmaller":
+        cursor.execute(
+            "INSERT INTO SAdjustedRandomizedPSPLargerSmaller (MatrixSeed, MRows, LargerCount, SmallerCount, HardFailures) VALUES (%s, %s, %s, %s, %s)",
+            (seed, rows, 0, 0, 0)
+        )
+    elif table == "TAdjustedRandomizedPSPLargerSmaller":
+        cursor.execute(
+            "INSERT INTO TAdjustedRandomizedPSPLargerSmaller (MatrixSeed, MRows, LargerCount, SmallerCount, HardFailures) VALUES (%s, %s, %s, %s, %s)",
+            (seed, rows, 0, 0, 0)
+        )
     conn.commit()
     cursor.close()
     mysql_connection.close_connection(conn)
