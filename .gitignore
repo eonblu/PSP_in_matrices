@@ -2,6 +2,7 @@
 /__pycache__
 auth.txt
 random_notes.txt
+backup_latex.txt
 
 # Sources
 /Sources/*

@@ -4,6 +4,7 @@ import numpy as np
 import mysql.connector as mysql
 import math
 import matplotlib.pyplot as plt
+from matplotlib import cm
 import statistics
 from collections import defaultdict
 
@@ -15,7 +16,31 @@ from adjusted_randomized_psp import *
 from sadjusted_randomized_psp import *
 from tadjusted_randomized_psp import *
 
+main_color = "xkcd:royal blue"
+second_color = "xkcd:red"
+third_color = "xkcd:green"
+fourth_color = "xkcd:bright blue"
+
+graph_size = (10, 4)
+graph_withsubplot_size = (20, 4)
+
+def ExampleGraph():
+    fig = plt.figure(figsize=(8,6))
+    ax = fig.add_subplot(111,projection='3d')
+    X = np.arange(1, 10, 1)
+    Y = np.arange(1, 10, 1)
+    X, Y = np.meshgrid(X, Y)
+    matrix = np.matrix([[192, 255, 298, 321, 324, 307, 270, 213, 156], [131, 194, 237, 260, 263, 246, 209, 152, 75], [90, 153, 196, 219, 222, 205, 168, 111, 34], [69, 132, 175, 198, 201, 184, 147, 90, 13], [68, 131, 174, 197, 200, 183, 146, 89, 12], [87, 150, 193, 216, 219, 202, 165, 108, 31], [126, 189, 232, 255, 258, 241, 204, 147, 70], [185, 248, 291, 314, 317, 300, 263, 206, 129], [264, 327, 370, 393, 396, 379, 342, 285, 208]])
+    ax.view_init(elev=25, azim=35)
+    point = ax.scatter(5, 5, 201, color='xkcd:black', s=50, alpha=1)
+    surf = ax.plot_surface(X, Y, matrix, cmap=cm.plasma, linewidth=0, antialiased=True, alpha=.7)
+    points = ax.scatter(X, Y, matrix, color='xkcd:black', s=1)
+    plt.yticks([])
+    plt.xticks([])
+    plt.savefig('ResultGraphs/ExampleGraph.png',bbox_inches='tight')
+
 def Testsuite1(): # Chance of SSP in Random Matrices
+    # Prerequisite: CREATE TABLE SSPinRandomMatrices (MRows int, MatricesWithSSP int, NumberOfTestedMatrices int);
     for rows in range(3, 13, 1):
         AmountOfTestedMatrices = 500000
         RandomMatricesWithSSP = 0
@@ -51,13 +76,13 @@ def Testsuite1Graph():
         x_values = [item[1] / item[2] for item in result]
         conjecture_values = [math.factorial(entry)*math.factorial(entry)/math.factorial(2*entry-1) for entry in MRows]
 
-        plt.figure(figsize=(8, 4))
-        line1 = plt.plot(MRows, x_values, marker='o', linestyle=':', color='r')
-        line2 = plt.plot(MRows, conjecture_values, marker='x', linestyle=':', color='b')
+        plt.figure(figsize=graph_size)
+        line1 = plt.plot(MRows, x_values, marker='o', linestyle=':', color=main_color)
+        line2 = plt.plot(MRows, conjecture_values, marker='x', linestyle=':', color=second_color)
 
         plt.xlabel('# Matrix Rows')
         plt.ylabel('# Matrices with SSP / # Matrices tested')
-        plt.grid(True)
+        plt.grid(False)
         plt.ylim(bottom=-0.001)
         plt.xlim(left=MRows[0], right=MRows[-1])
         plt.legend([line1[0], line2[0]], ["Test Results", "n! * m! / (n + m -1)!"])
@@ -65,7 +90,8 @@ def Testsuite1Graph():
         plt.savefig('ResultGraphs/RandomMatricesWithSSP.png')
 
 def Testsuite2(): # Bienstock vs Dallant small matrices
-    for seed in range(1, 200, 1):
+    # Prerequisite: CREATE TABLE FindingMinL (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int);
+    for seed in range(1, 251, 1):
         for rows in range(5, 19, 1):
             create_in_result_tables("FindingMinL", rows, seed)
     result = FetchTestMatrices("FindingMinL")
@@ -103,26 +129,26 @@ def Testsuite2Graph():
         comp1_data = [comp1_dict[key] for key in sorted_keys]
         comp2_data = [comp2_dict[key] for key in sorted_keys]
 
-        fig, ax = plt.subplots(figsize=(10, 5))
+        fig, ax = plt.subplots(figsize=graph_size)
         positions1 = np.arange(len(sorted_keys)) * 2.0
         positions2 = positions1 + 0.7
 
-        bp1 = ax.boxplot(comp1_data, positions=positions1, widths=0.6, patch_artist=True, boxprops=dict(facecolor="C0"), notch=True)
-        bp2 = ax.boxplot(comp2_data, positions=positions2, widths=0.6, patch_artist=True, boxprops=dict(facecolor="C1"), notch=True)
+        bp1 = ax.boxplot(comp1_data, positions=positions1, widths=0.6, patch_artist=True, boxprops={'facecolor': main_color}, notch=True, meanline=False, showfliers=False, medianprops={'color': 'none'})
+        bp2 = ax.boxplot(comp2_data, positions=positions2, widths=0.6, patch_artist=True, boxprops={'facecolor': second_color}, notch=True, meanline=False, showfliers=False, medianprops={'color': 'none'})
 
         ax.set_xticks(positions1 + 0.35)
         ax.set_xticklabels(sorted_keys)
         ax.set_xlabel('Amount of Rows')
         ax.set_ylabel('Comparisons')
         ax.set_title('Boxplot of Comparisons by Amount of Rows')
-        ax.legend([bp1["boxes"][0], bp2["boxes"][0]], ["Bienstock", "Submatrices"], loc='upper right', bbox_to_anchor=(0.2, 1))
+        ax.legend([bp1["boxes"][0], bp2["boxes"][0]], ["Bienstock", "Dallant"], loc='upper right', bbox_to_anchor=(0.2, 1))
 
         plt.savefig('ResultGraphs/FindingMinL_results.png')
 
 def Testsuite3(): # Bienstock vs Dallant general
     # Prerequisite: CREATE TABLE BienstockDallantGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int);
-    for seed in range(1, 201, 1):
-        for rows in range(500, 10001, 500):
+    for seed in range(251, 351, 1):
+        for rows in range(200, 10001, 200):
             create_in_result_tables("BienstockDallantGeneral", rows, seed)
     result = FetchTestMatrices("BienstockDallantGeneral")
     if result:
@@ -154,10 +180,10 @@ def Testsuite3Graph():
         result1 = [np.mean([res1 for res1, res2 in grouped_data[row]]) for row in rows]
         result2 = [np.mean([res2 for res1, res2 in grouped_data[row]]) for row in rows]
 
-        plt.figure(figsize=(8, 4))
+        plt.figure(figsize=graph_size)
 
-        line1 = plt.plot(rows, result1, linestyle='-', color='r', marker='')
-        line2 = plt.plot(rows, result2, linestyle='-', color='b', marker='')
+        line1 = plt.plot(rows, result1, linestyle='-', color=main_color, marker='')
+        line2 = plt.plot(rows, result2, linestyle='-', color=second_color, marker='')
 
         plt.ylim(bottom=0)
         plt.xlim(left=rows[0], right=rows[-1])
@@ -171,53 +197,45 @@ def Testsuite3Graph():
 
         plt.savefig('ResultGraphs/BienstockDallantGeneral.png')
 
-def Testsuite4(): # Bienstock vs Dallant vs TwoLevelRecursion general
-    # Prerequisite: CREATE TABLE BienstockDallantTwoLevelGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int, TwoLevelRes int);
-    for seed in range(201, 221, 1):
-        for rows in range(500, 10001, 500):
-            create_in_result_tables("BienstockDallantTwoLevelGeneral", rows, seed)
-    result = FetchTestMatrices("BienstockDallantTwoLevelGeneral")
+def Testsuite4(): # Dallant vs TwoLevelRecursion general
+    # Prerequisite: CREATE TABLE DallantTwoLevelGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, RecursiveRes int, TwoLevelRes int);
+    for seed in range(351, 451, 1):
+        for rows in range(200, 18001, 200):
+            create_in_result_tables("DallantTwoLevelGeneral", rows, seed)
+    result = FetchTestMatrices("DallantTwoLevelGeneral")
     if result:
         for matrix_info in result:
             sys.stdout.flush()
             matrixid, seed, rows = matrix_info
             matrix = create_matrix_with_ssp(seed, rows)
-            CompsObjB = Comparisons()
             CompsObjR = Comparisons()
             CompsObjT = Comparisons()
-            PSP = BienstockBase(matrix, rows, CompsObjB)
-            if PSP[0] != rows:
-                print("Error in calculation of PSP")
-            else:
-                UpdateTestResult(matrixid, "BienstockDallantTwoLevelGeneral", "BienstockRes", CompsObjB.value)
             PSP = RecursiveBase(matrix, rows, CompsObjR, 0)
             if PSP[0] != rows:
                 print("Error in calculation of PSP")
             else:
-                UpdateTestResult(matrixid, "BienstockDallantTwoLevelGeneral", "RecursiveRes", CompsObjR.value)
+                UpdateTestResult(matrixid, "DallantTwoLevelGeneral", "RecursiveRes", CompsObjR.value)
             PSP = RecursiveBase(matrix, rows, CompsObjT, 2)
             if PSP[0] != rows:
                 print("Error in calculation of PSP")
             else:
-                UpdateTestResult(matrixid, "BienstockDallantTwoLevelGeneral", "TwoLevelRes", CompsObjT.value)
+                UpdateTestResult(matrixid, "DallantTwoLevelGeneral", "TwoLevelRes", CompsObjT.value)
 
 def Testsuite4Graph():
-    result = FetchTestMatrices("BienstockDallantTwoLevelGeneral_results")
+    result = FetchTestMatrices("DallantTwoLevelGeneral_results")
     if result:
         grouped_data = defaultdict(list)
-        for row, res1, res2, res3 in result:
-            grouped_data[row].append((res1, res2, res3))
+        for row, res1, res2 in result:
+            grouped_data[row].append((res1, res2))
 
         rows = sorted(grouped_data.keys())
-        result1 = [np.mean([res1 for res1, res2, res3 in grouped_data[row]]) for row in rows]
-        result2 = [np.mean([res2 for res1, res2, res3 in grouped_data[row]]) for row in rows]
-        result3 = [np.mean([res3 for res1, res2, res3 in grouped_data[row]]) for row in rows]
+        result1 = [np.mean([res1 for res1, res2 in grouped_data[row]]) for row in rows]
+        result2 = [np.mean([res2 for res1, res2 in grouped_data[row]]) for row in rows]
 
-        plt.figure(figsize=(8, 4))
+        plt.figure(figsize=graph_size)
 
-        line1 = plt.plot(rows, result1, linestyle='-', color='r', marker='')
-        line2 = plt.plot(rows, result2, linestyle='-', color='b', marker='')
-        line3 = plt.plot(rows, result3, linestyle='-', color='g', marker='')
+        line1 = plt.plot(rows, result1, linestyle='-', color=second_color, marker='')
+        line2 = plt.plot(rows, result2, linestyle='-', color=main_color, marker='')
 
         plt.ylim(bottom=0)
         plt.xlim(left=rows[0], right=rows[-1])
@@ -227,14 +245,14 @@ def Testsuite4Graph():
         plt.xlabel('# Matrix Rows')
         plt.ylabel('# Comparisons made to find PSP')
         plt.grid(False)
-        plt.legend([line1[0], line2[0], line3[0]], ["Bienstock", "Dallant", "Two Level Dallant"])
+        plt.legend([line1[0], line2[0]], ["Dallant", "Two Level Dallant"])
 
-        plt.savefig('ResultGraphs/BienstockDallantTwoLevelGeneral.png')
+        plt.savefig('ResultGraphs/DallantTwoLevelGeneral.png')
 
 def Testsuite5():
     # Prerequisite: CREATE TABLE RandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float);
-    for seed in range(1, 41, 1):
-        for rows in range(500, 10001, 500):
+    for seed in range(451, 551, 1):
+        for rows in range(200, 10001, 200):
             create_in_result_tables("RandomizedPSPLargerSmaller", rows, seed)
     result = FetchTestMatrices("RandomizedPSPLargerSmaller")
     if result:
@@ -244,7 +262,7 @@ def Testsuite5():
             matrix = create_matrix_with_ssp(seed, rows)
             larger_counts = []
             smaller_counts = []
-            for i in range(10):
+            for i in range(20):
                 testresult = ReduceMatrixTestsuite(matrix, Comparisons())
                 larger_counts.append(len(testresult[0]))
                 smaller_counts.append(len(testresult[1]))
@@ -261,9 +279,9 @@ def Testsuite5Graph():
         rows = sorted(grouped_data.keys())
         result = [np.mean([grouped_data[row]]) for row in rows]
 
-        plt.figure(figsize=(6, 4))
+        plt.figure(figsize=graph_size)
 
-        line1 = plt.plot(rows, result, linestyle='-', color='r', marker='')
+        line1 = plt.plot(rows, result, linestyle='-', color=main_color, marker='')
 
         plt.ylim(bottom=0, top=3)
         plt.xlim(left=rows[0], right=rows[-1])
@@ -278,8 +296,8 @@ def Testsuite5Graph():
 
 def Testsuite6():
     # Prerequisite: CREATE TABLE AdjustedRandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float, HardFailures int);
-    for seed in range(200, 301, 1):
-        for rows in range(200, 10401, 200):
+    for seed in range(551, 651, 1):
+        for rows in range(200, 10001, 200):
             create_in_result_tables("AdjustedRandomizedPSPLargerSmaller", rows, seed)      
     result = FetchTestMatrices("AdjustedRandomizedPSPLargerSmaller")
     if result:
@@ -319,35 +337,33 @@ def Testsuite6Graph():
         for n in rows:
             failure_rate_line.append((failure_data[n])/(40*len(grouped_data[n]))) # 20 runs for each matrix, 2 results per run
 
-        plt.figure(figsize=(8, 4))
-
         rows = [row for row in rows]
         koverfour_rows = [row/4 for row in rows]
         result = [np.mean([grouped_data[row]]) for row in rows]
         max_res = [np.max([grouped_data[row]]) for row in rows]
         min_res = [np.min([grouped_data[row]]) for row in rows]
 
-        fig, ax1 = plt.subplots()
-        line1 = ax1.plot(rows, result, linestyle='-', color='r', marker='')
-        fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0, color='r')
-        line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color='b', marker='')
+        fig, ax1 = plt.subplots(1, 1, figsize=(graph_size))
+        line1 = ax1.plot(rows, result, linestyle='-', color=main_color, marker='')
+        fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0, color=main_color)
+        line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color=second_color, marker='')
         plt.xlabel('# Matrix Rows')
         plt.ylabel('# Rows/Columns')
         plt.xlim(left=rows[0], right=rows[-1])
         plt.ylim(bottom=50)
 
         ax2 = ax1.twinx()
-        line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color='g', marker='')
+        line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color=third_color, marker='')
         plt.ylabel('Hard failure rate')
-        plt.ylim(bottom=0, top=1)
+        plt.ylim(bottom=0, top=0.1)
         plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
         plt.savefig('ResultGraphs/AdjustedRandomizedPSPLargerSmaller.png')
         plt.clf()
 
 def Testsuite7():
     # Prerequisite: CREATE TABLE SAdjustedRandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float, HardFailures int);
-    for seed in range(100, 201, 1):          
-        for rows in range(200, 10401, 200):
+    for seed in range(651, 751, 1):          
+        for rows in range(200, 10001, 200):
             create_in_result_tables("SAdjustedRandomizedPSPLargerSmaller", rows, seed)      
     result = FetchTestMatrices("SAdjustedRandomizedPSPLargerSmaller")
     if result:
@@ -387,25 +403,23 @@ def Testsuite7Graph():
         for n in rows:
             failure_rate_line.append((failure_data[n])/(40*len(grouped_data[n]))) # 20 runs for each matrix, 2 results per run
 
-        plt.figure(figsize=(8, 4))
-
         rows = [row for row in rows]
         koverfour_rows = [row/4 for row in rows]
         result = [np.mean([grouped_data[row]]) for row in rows]
         max_res = [np.max([grouped_data[row]]) for row in rows]
         min_res = [np.min([grouped_data[row]]) for row in rows]
 
-        fig, ax1 = plt.subplots()
-        line1 = ax1.plot(rows, result, linestyle='-', color='r', marker='')
-        fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0)
-        line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color='b', marker='')
+        fig, ax1 = plt.subplots(1, 1, figsize=(graph_size))
+        line1 = ax1.plot(rows, result, linestyle='-', color=main_color, marker='')
+        fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0, color=main_color)
+        line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color=second_color, marker='')
         plt.xlabel('# Matrix Rows')
         plt.ylabel('# Rows/Columns')
         plt.xlim(left=rows[0], right=rows[-1])
         plt.ylim(bottom=50)
 
         ax2 = ax1.twinx()
-        line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color='g', marker='')
+        line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color=third_color, marker='')
         plt.ylabel('Hard failure rate')
         plt.ylim(bottom=0, top=0.1)
         plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
@@ -414,8 +428,8 @@ def Testsuite7Graph():
 
 def Testsuite8():
     # Prerequisite: CREATE TABLE TAdjustedRandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float, HardFailures int);
-    for seed in range(300, 401, 1):          
-        for rows in range(20, 401, 20):
+    for seed in range(751, 851, 1):          
+        for rows in range(20, 401, 5):
             create_in_result_tables("TAdjustedRandomizedPSPLargerSmaller", rows, seed)      
     result = FetchTestMatrices("TAdjustedRandomizedPSPLargerSmaller")
     if result:
@@ -455,30 +469,105 @@ def Testsuite8Graph():
         for n in rows:
             failure_rate_line.append((failure_data[n])/(40*len(grouped_data[n]))) # 20 runs for each matrix, 2 results per run
 
-        plt.figure(figsize=(8, 4))
-
         rows = [row for row in rows]
         koverfour_rows = [row/4 for row in rows]
         result = [np.mean([grouped_data[row]]) for row in rows]
         max_res = [np.max([grouped_data[row]]) for row in rows]
         min_res = [np.min([grouped_data[row]]) for row in rows]
 
-        fig, ax1 = plt.subplots()
-        line1 = ax1.plot(rows, result, linestyle='-', color='r', marker='')
-        fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0)
-        line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color='b', marker='')
+        fig, ax1 = plt.subplots(1, 1, figsize=(graph_size))
+        line1 = ax1.plot(rows, result, linestyle='-', color=main_color, marker='')
+        fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0, color=main_color)
+        line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color=second_color, marker='')
         plt.xlabel('# Matrix Rows')
         plt.ylabel('# Rows/Columns')
         plt.xlim(left=rows[0], right=rows[-1])
         plt.ylim(bottom=0)
 
         ax2 = ax1.twinx()
-        line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color='g', marker='')
+        line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color=third_color, marker='')
         plt.ylabel('Hard failure rate')
         plt.ylim(bottom=0, top=0.1)
         plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
         plt.savefig('ResultGraphs/TAdjustedRandomizedPSPLargerSmaller.png')
         plt.clf()
+
+def Testsuite9(): # Final comparison between Bienstock, Dallant 1 & 2, Adjusted Randomized
+    # Prerequisite: CREATE TABLE FinalGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int, TwoLevelRes int, RandomizedRes int);
+    for seed in range(851, 951, 1):
+        for rows in range(200, 10001, 200):
+            create_in_result_tables("FinalGeneral", rows, seed)
+    result = FetchTestMatrices("FinalGeneral")
+    if result:
+        for matrix_info in result:
+            sys.stdout.flush()
+            matrixid, seed, rows = matrix_info
+            matrix = create_matrix_with_ssp(seed, rows)
+            CompsObjB = Comparisons()
+            CompsObjD = Comparisons()
+            CompsObjT = Comparisons()
+            CompsObjR = Comparisons()
+            PSP = BienstockBase(matrix, rows, CompsObjB)
+            if PSP[0] != rows:
+                print("Error in calculation of PSP")
+            else:
+                UpdateTestResult(matrixid, "FinalGeneral", "BienstockRes", CompsObjB.value)
+            PSP = RecursiveBase(matrix, rows, CompsObjD, 0)
+            if PSP[0] != rows:
+                print("Error in calculation of PSP")
+            else:
+                UpdateTestResult(matrixid, "FinalGeneral", "RecursiveRes", CompsObjD.value)
+            PSP = RecursiveBase(matrix, rows, CompsObjT, 2)
+            if PSP[0] != rows:
+                print("Error in calculation of PSP")
+            else:
+                UpdateTestResult(matrixid, "FinalGeneral", "TwoLevelRes", CompsObjT.value)
+            
+            error = False
+            CompsList = []
+            for i in range(20):
+                CompsObjR = Comparisons()
+                PSP = TAdjustedReduceMatrix(matrix, CompsObjR)
+                if PSP != rows:
+                    print("Error in calculation of PSP")
+                    error = True
+                else:
+                    CompsList.append(CompsObjR.value)
+            if not error:
+                UpdateTestResult(matrixid, "FinalGeneral", "RandomizedRes", sum(CompsList)/len(CompsList))
+
+def Testsuite9Graph():
+    result = FetchTestMatrices("FinalGeneral_results")
+    if result:
+        grouped_data = defaultdict(list)
+        for row, res1, res2, res3, res4 in result:
+            grouped_data[row].append((res1, res2, res3, res4))
+
+        rows = sorted(grouped_data.keys())
+        result1 = [np.mean([res1 for res1, res2, res3, res4 in grouped_data[row]]) for row in rows]
+        result2 = [np.mean([res2 for res1, res2, res3, res4 in grouped_data[row]]) for row in rows]
+        result3 = [np.mean([res3 for res1, res2, res3, res4 in grouped_data[row]]) for row in rows]
+        result4 = [np.mean([res4 for res1, res2, res3, res4 in grouped_data[row]]) for row in rows]
+
+        plt.figure(figsize=graph_size)
+
+        line1 = plt.plot(rows, result1, linestyle='-', color=main_color, marker='')
+        line2 = plt.plot(rows, result2, linestyle='-', color=second_color, marker='')
+        line3 = plt.plot(rows, result3, linestyle='-', color=fourth_color, marker='')
+        line4 = plt.plot(rows, result4, linestyle='-', color=third_color, marker='')
+        fill_between4 = plt.fill_between(rows, [np.max([res4 for res1, res2, res3, res4 in grouped_data[row]]) for row in rows], [np.min([res4 for res1, res2, res3, res4 in grouped_data[row]]) for row in rows], alpha=.2, linewidth=0, color=third_color)
+
+        plt.ylim(bottom=0)
+        plt.xlim(left=rows[0], right=rows[-1])
+        plt.yticks([0,100000,200000,300000,400000,500000],["0","10⁵","2*10⁵","3*10⁵","4*10⁵","5*10⁵"])
+        plt.xticks([500,2000,4000,6000,8000,10000],["500","2000","4000","6000","8000","10000"])
+
+        plt.xlabel('# Matrix Rows')
+        plt.ylabel('# Comparisons made to find PSP')
+        plt.grid(False)
+        plt.legend([line1[0], line2[0], line3[0], line4[0]], ["Bienstock", "Dallant", "Two Level Dallant", "Adjusted Randomized"])
+
+        plt.savefig('ResultGraphs/FinalGeneral.png') 
 
 def FetchTestMatrices(table):
     conn = mysql_connection.new_connection()
@@ -496,11 +585,11 @@ def FetchTestMatrices(table):
     elif table == "BienstockDallantGeneral_results":
         cursor.execute("SELECT MRows, BienstockRes, RecursiveRes FROM BienstockDallantGeneral WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0",)
         result = cursor.fetchall()
-    elif table == "BienstockDallantTwoLevelGeneral":
-        cursor.execute("SELECT MatrixID, MatrixSeed, MRows FROM BienstockDallantTwoLevelGeneral WHERE BienstockRes = 0 OR RecursiveRes = 0 OR TwoLevelRes = 0",)
+    elif table == "DallantTwoLevelGeneral":
+        cursor.execute("SELECT MatrixID, MatrixSeed, MRows FROM DallantTwoLevelGeneral WHERE RecursiveRes = 0 OR TwoLevelRes = 0",)
         result = cursor.fetchall()
-    elif table == "BienstockDallantTwoLevelGeneral_results":
-        cursor.execute("SELECT MRows, BienstockRes, RecursiveRes, TwoLevelRes FROM BienstockDallantTwoLevelGeneral WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0 AND NOT TwoLevelRes = 0",)
+    elif table == "DallantTwoLevelGeneral_results":
+        cursor.execute("SELECT MRows, RecursiveRes, TwoLevelRes FROM DallantTwoLevelGeneral WHERE NOT RecursiveRes = 0 AND NOT TwoLevelRes = 0",)
         result = cursor.fetchall()
     elif table == "SSPinRandomMatrices":
         cursor.execute("SELECT * FROM SSPinRandomMatrices",)
@@ -529,6 +618,13 @@ def FetchTestMatrices(table):
     elif table == "TAdjustedRandomizedPSPLargerSmaller_results":
         cursor.execute("SELECT MRows, LargerCount, SmallerCount, HardFailures FROM TAdjustedRandomizedPSPLargerSmaller WHERE NOT LargerCount = 0 AND NOT SmallerCount = 0")
         result = cursor.fetchall()
+    elif table == "FinalGeneral":
+        cursor.execute("SELECT MatrixID, MatrixSeed, MRows FROM FinalGeneral WHERE BienstockRes = 0 OR RecursiveRes = 0 OR TwoLevelRes = 0 OR RandomizedRes = 0",)
+        result = cursor.fetchall()
+    elif table == "FinalGeneral_results":
+        cursor.execute("SELECT MRows, BienstockRes, RecursiveRes, TwoLevelRes, RandomizedRes FROM FinalGeneral WHERE NOT BienstockRes = 0 AND NOT RecursiveRes = 0 AND NOT TwoLevelRes = 0 AND NOT RandomizedRes = 0",)
+        result = cursor.fetchall()    
+    
     cursor.close()
     mysql_connection.close_connection(conn)
     return result
@@ -544,8 +640,8 @@ def UpdateTestResult(matrixid, table, field_name, result):
         update_query = f"UPDATE BienstockDallantGeneral SET {field_name} = %s WHERE MatrixID = %s"
         cursor.execute(update_query, (result, matrixid))
         conn.commit()
-    elif table == "BienstockDallantTwoLevelGeneral":
-        update_query = f"UPDATE BienstockDallantTwoLevelGeneral SET {field_name} = %s WHERE MatrixID = %s"
+    elif table == "DallantTwoLevelGeneral":
+        update_query = f"UPDATE DallantTwoLevelGeneral SET {field_name} = %s WHERE MatrixID = %s"
         cursor.execute(update_query, (result, matrixid))
         conn.commit()    
     elif table == "RandomizedPSPLargerSmaller":
@@ -564,8 +660,16 @@ def UpdateTestResult(matrixid, table, field_name, result):
         update_query = f"UPDATE TAdjustedRandomizedPSPLargerSmaller SET {field_name} = %s WHERE MatrixID = %s"
         cursor.execute(update_query, (result, matrixid))
         conn.commit()
+    elif table == "FinalGeneral":
+        update_query = f"UPDATE FinalGeneral SET {field_name} = %s WHERE MatrixID = %s"
+        cursor.execute(update_query, (result, matrixid))
+        conn.commit()
     cursor.close()
     conn.close()
 
 if __name__ == '__main__':
+    Testsuite5Graph()
+    Testsuite6Graph()
+    Testsuite7Graph()
     Testsuite8Graph()
+    Testsuite9Graph()

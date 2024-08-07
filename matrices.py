@@ -63,10 +63,10 @@ def create_in_result_tables(table, rows, seed):
             "INSERT INTO BienstockDallantGeneral (MatrixSeed, MRows, BienstockRes, RecursiveRes) VALUES (%s, %s, %s, %s)",
             (seed, rows, 0, 0)
         )
-    elif table == "BienstockDallantTwoLevelGeneral":
+    elif table == "DallantTwoLevelGeneral":
         cursor.execute(
-            "INSERT INTO BienstockDallantTwoLevelGeneral (MatrixSeed, MRows, BienstockRes, RecursiveRes, TwoLevelRes) VALUES (%s, %s, %s, %s, %s)",
-            (seed, rows, 0, 0, 0)
+            "INSERT INTO DallantTwoLevelGeneral (MatrixSeed, MRows, RecursiveRes, TwoLevelRes) VALUES (%s, %s, %s, %s)",
+            (seed, rows, 0, 0)
         )
     elif table == "RandomizedPSPLargerSmaller":
         cursor.execute(
@@ -88,6 +88,11 @@ def create_in_result_tables(table, rows, seed):
             "INSERT INTO TAdjustedRandomizedPSPLargerSmaller (MatrixSeed, MRows, LargerCount, SmallerCount, HardFailures) VALUES (%s, %s, %s, %s, %s)",
             (seed, rows, 0, 0, 0)
         )
+    elif table == "FinalGeneral":
+        cursor.execute(
+            "INSERT INTO FinalGeneral (MatrixSeed, MRows, BienstockRes, RecursiveRes, TwoLevelRes, RandomizedRes) VALUES (%s, %s, %s, %s, %s, %s)",
+            (seed, rows, 0, 0, 0, 0)
+        )
     conn.commit()
     cursor.close()
     mysql_connection.close_connection(conn)
@@ -108,8 +113,8 @@ def retrieve_matrix(matrix_id):
     return matrix, rows, matrix_id
 
 if __name__ == '__main__':
-    seed = 21592
-    r = 24
+    seed = 2129
+    r = 4
     print(create_matrix_with_ssp(seed, r))
     # matrix1 = create_matrix_with_ssp(seed, r)
     # add_to_mysql_table(matrix1, seed)

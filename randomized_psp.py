@@ -55,7 +55,6 @@ def FindHorizontalPivot(matrix, CompsObj):
     if p[0] > t:
         return False, [-1]
     elif len(columns_to_remove) < math.floor(len(matrix[0])/4): # soft failure
-        print(p)
         return False, columns_to_remove
     else:
         return p, columns_to_remove
@@ -98,7 +97,6 @@ def FindVerticalPivot(matrix, CompsObj):
     if p[0] < t:
         return False, [-1]
     elif len(rows_to_remove) < math.floor(len(matrix)/4):
-        print(p)
         return False, rows_to_remove
     else:
         return p, rows_to_remove

@@ -99,7 +99,7 @@ def TAdjustedFindVerticalPivot(matrix, CompsObj):
         t = max(t, q_selected[0])
         for j in reversed(setof_q_i):
             CompsObj.increment()
-            if j[0] < t and len(ignored_columns) < len(matrix) - 1:
+            if j[0] < t and len(ignored_columns) < len(matrix[0]) - 1:
                 ignored_columns.add(j[2])
 
     # Phase 2
@@ -135,7 +135,6 @@ def TAdjustedFindVerticalPivot(matrix, CompsObj):
 
 def TAdjustedReduceMatrix(matrix, CompsObj):
     while len(matrix) > 10 or len(matrix[0]) > 10:
-        print(matrix.shape)
         if len(matrix[0]) > 10: # Prevent unecessary comparisons if one dimension is already minimal size
             p_hor, columns_to_remove = TAdjustedFindHorizontalPivot(matrix, CompsObj)
         if len(matrix) > 10:
@@ -153,8 +152,6 @@ def TAdjustedReduceMatrix(matrix, CompsObj):
                 for row in reversed(rows_to_remove):
                     if len(matrix) > 10:
                         matrix = np.delete(matrix, row, 0)
-        else:
-            return "Failed"
     return BienstockBase(matrix, 10, CompsObj)[0]
 
 def TAdjustedReduceMatrixTestsuite(matrix, CompsObj):
@@ -164,6 +161,6 @@ def TAdjustedReduceMatrixTestsuite(matrix, CompsObj):
 
 if __name__ == '__main__':
     CompsObjRandom = Comparisons()
-    matrix = create_matrix_with_ssp(300, 10)
-    result = TAdjustedReduceMatrixTestsuite(matrix, CompsObjRandom)
+    matrix = create_matrix_with_ssp(300, 500)
+    result = TAdjustedReduceMatrix(matrix, CompsObjRandom)
     print(result, CompsObjRandom.value)
