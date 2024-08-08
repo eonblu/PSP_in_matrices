@@ -37,7 +37,7 @@ def ExampleGraph():
     points = ax.scatter(X, Y, matrix, color='xkcd:black', s=1)
     plt.yticks([])
     plt.xticks([])
-    plt.savefig('ResultGraphs/ExampleGraph.png',bbox_inches='tight')
+    plt.savefig('ResultGraphs/ExampleGraph.svg',bbox_inches='tight')
 
 def Testsuite1(): # Chance of SSP in Random Matrices
     # Prerequisite: CREATE TABLE SSPinRandomMatrices (MRows int, MatricesWithSSP int, NumberOfTestedMatrices int);
@@ -81,13 +81,15 @@ def Testsuite1Graph():
         line2 = plt.plot(MRows, conjecture_values, marker='x', linestyle=':', color=second_color)
 
         plt.xlabel('# Matrix Rows')
-        plt.ylabel('# Matrices with SSP / # Matrices tested')
+        plt.ylabel('Probability of SSP')
         plt.grid(False)
         plt.ylim(bottom=-0.001)
         plt.xlim(left=MRows[0], right=MRows[-1])
-        plt.legend([line1[0], line2[0]], ["Test Results", "n! * m! / (n + m -1)!"])
+        plt.yticks([0,0.05,0.1,0.15,0.2,0.25,0.3],["0%","5%","10%","15%","20%","25%","30%"])
 
-        plt.savefig('ResultGraphs/RandomMatricesWithSSP.png')
+        plt.legend([line1[0], line2[0]], ["Test results", "n! * m! / (n + m -1)!"])
+
+        plt.savefig('ResultGraphs/RandomMatricesWithSSP.svg')
 
 def Testsuite2(): # Bienstock vs Dallant small matrices
     # Prerequisite: CREATE TABLE FindingMinL (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int);
@@ -138,12 +140,11 @@ def Testsuite2Graph():
 
         ax.set_xticks(positions1 + 0.35)
         ax.set_xticklabels(sorted_keys)
-        ax.set_xlabel('Amount of Rows')
-        ax.set_ylabel('Comparisons')
-        ax.set_title('Boxplot of Comparisons by Amount of Rows')
+        ax.set_xlabel('# Matrix Rows')
+        ax.set_ylabel('# Comparisons between Matrix entries')
         ax.legend([bp1["boxes"][0], bp2["boxes"][0]], ["Bienstock", "Dallant"], loc='upper right', bbox_to_anchor=(0.2, 1))
 
-        plt.savefig('ResultGraphs/FindingMinL_results.png')
+        plt.savefig('ResultGraphs/FindingMinL_results.svg')
 
 def Testsuite3(): # Bienstock vs Dallant general
     # Prerequisite: CREATE TABLE BienstockDallantGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int);
@@ -188,14 +189,14 @@ def Testsuite3Graph():
         plt.ylim(bottom=0)
         plt.xlim(left=rows[0], right=rows[-1])
         plt.yticks([0,100000,200000,300000,400000,500000],["0","10⁵","2*10⁵","3*10⁵","4*10⁵","5*10⁵"])
-        plt.xticks([500,2000,4000,6000,8000,10000],["500","2000","4000","6000","8000","10000"])
+        plt.xticks([200,2000,4000,6000,8000,10000],["200","2000","4000","6000","8000","10000"])
 
         plt.xlabel('# Matrix Rows')
-        plt.ylabel('# Comparisons made to find PSP')
+        plt.ylabel('# Comparisons between Matrix entries')
         plt.grid(False)
         plt.legend([line1[0], line2[0]], ["Bienstock", "Dallant"])
 
-        plt.savefig('ResultGraphs/BienstockDallantGeneral.png')
+        plt.savefig('ResultGraphs/BienstockDallantGeneral.svg')
 
 def Testsuite4(): # Dallant vs TwoLevelRecursion general
     # Prerequisite: CREATE TABLE DallantTwoLevelGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, RecursiveRes int, TwoLevelRes int);
@@ -240,14 +241,14 @@ def Testsuite4Graph():
         plt.ylim(bottom=0)
         plt.xlim(left=rows[0], right=rows[-1])
         plt.yticks([0,100000,200000,300000,400000,500000],["0","10⁵","2*10⁵","3*10⁵","4*10⁵","5*10⁵"])
-        plt.xticks([500,2000,4000,6000,8000,10000,12000,14000,16000,18000],["500","2000","4000","6000","8000","10000","12000","14000","16000","18000"])
+        plt.xticks([2000,4000,6000,8000,10000,12000,14000,16000,18000],["2000","4000","6000","8000","10000","12000","14000","16000","18000"])
 
         plt.xlabel('# Matrix Rows')
-        plt.ylabel('# Comparisons made to find PSP')
+        plt.ylabel('# Comparisons between matrix entries')
         plt.grid(False)
-        plt.legend([line1[0], line2[0]], ["Dallant", "Two Level Dallant"])
+        plt.legend([line1[0], line2[0]], ["Dallant", "Dallant recursively applied"])
 
-        plt.savefig('ResultGraphs/DallantTwoLevelGeneral.png')
+        plt.savefig('ResultGraphs/DallantTwoLevelGeneral.svg')
 
 def Testsuite5():
     # Prerequisite: CREATE TABLE RandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float);
@@ -286,13 +287,13 @@ def Testsuite5Graph():
         plt.ylim(bottom=0, top=3)
         plt.xlim(left=rows[0], right=rows[-1])
         plt.yticks([0,1,2,3],["0","1","2","3"])
-        plt.xticks([500,2000,4000,6000,8000,10000],["500","2000","4000","6000","8000","10000"])
+        plt.xticks([200,2000,4000,6000,8000,10000],["200","2000","4000","6000","8000","10000"])
 
         plt.xlabel('# Matrix Rows')
         plt.ylabel('# Rows/Columns to be\nremoved based on pivot')
         plt.grid(False)
 
-        plt.savefig('ResultGraphs/RandomizedPSPLargerSmaller.png')
+        plt.savefig('ResultGraphs/RandomizedPSPLargerSmaller.svg')
 
 def Testsuite6():
     # Prerequisite: CREATE TABLE AdjustedRandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float, HardFailures int);
@@ -348,16 +349,18 @@ def Testsuite6Graph():
         fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0, color=main_color)
         line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color=second_color, marker='')
         plt.xlabel('# Matrix Rows')
-        plt.ylabel('# Rows/Columns')
+        plt.xticks([200,2000,4000,6000,8000,10000],["200","2000","4000","6000","8000","10000"])
+        plt.ylabel('# Rows/Columns to be\nremoved based on pivot')
         plt.xlim(left=rows[0], right=rows[-1])
         plt.ylim(bottom=50)
 
         ax2 = ax1.twinx()
         line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color=third_color, marker='')
         plt.ylabel('Hard failure rate')
-        plt.ylim(bottom=0, top=0.1)
+        plt.ylim(bottom=0, top=0.05)
+        plt.yticks([0,0.01,0.02,0.03,0.04,0.05],["0%","1%","2%","3%","4%","5%"])
         plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
-        plt.savefig('ResultGraphs/AdjustedRandomizedPSPLargerSmaller.png')
+        plt.savefig('ResultGraphs/AdjustedRandomizedPSPLargerSmaller.svg')
         plt.clf()
 
 def Testsuite7():
@@ -414,16 +417,18 @@ def Testsuite7Graph():
         fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0, color=main_color)
         line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color=second_color, marker='')
         plt.xlabel('# Matrix Rows')
-        plt.ylabel('# Rows/Columns')
+        plt.xticks([200,2000,4000,6000,8000,10000],["200","2000","4000","6000","8000","10000"])
+        plt.ylabel('# Rows/Columns to be\nremoved based on pivot')
         plt.xlim(left=rows[0], right=rows[-1])
         plt.ylim(bottom=50)
 
         ax2 = ax1.twinx()
         line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color=third_color, marker='')
         plt.ylabel('Hard failure rate')
-        plt.ylim(bottom=0, top=0.1)
+        plt.yticks([0,0.01,0.02,0.03,0.04,0.05],["0%","1%","2%","3%","4%","5%"])
+        plt.ylim(bottom=0, top=0.05)
         plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
-        plt.savefig('ResultGraphs/SAdjustedRandomizedPSPLargerSmaller.png')
+        plt.savefig('ResultGraphs/SAdjustedRandomizedPSPLargerSmaller.svg')
         plt.clf()
 
 def Testsuite8():
@@ -480,16 +485,18 @@ def Testsuite8Graph():
         fill_between = ax1.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0, color=main_color)
         line2 = ax1.plot(rows, koverfour_rows, linestyle='-', color=second_color, marker='')
         plt.xlabel('# Matrix Rows')
-        plt.ylabel('# Rows/Columns')
+        plt.xticks([20,100,200,300,400],["20","100","200","300","400"])
+        plt.ylabel('# Rows/Columns to be\nremoved based on pivot')
         plt.xlim(left=rows[0], right=rows[-1])
         plt.ylim(bottom=0)
 
         ax2 = ax1.twinx()
         line3 = ax2.plot(rows, failure_rate_line, linestyle='-', color=third_color, marker='')
         plt.ylabel('Hard failure rate')
-        plt.ylim(bottom=0, top=0.1)
+        plt.yticks([0,0.01,0.02,0.03,0.04,0.05],["0%","1%","2%","3%","4%","5%"])
+        plt.ylim(bottom=0, top=0.05)
         plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
-        plt.savefig('ResultGraphs/TAdjustedRandomizedPSPLargerSmaller.png')
+        plt.savefig('ResultGraphs/TAdjustedRandomizedPSPLargerSmaller.svg')
         plt.clf()
 
 def Testsuite9(): # Final comparison between Bienstock, Dallant 1 & 2, Adjusted Randomized
@@ -560,14 +567,14 @@ def Testsuite9Graph():
         plt.ylim(bottom=0)
         plt.xlim(left=rows[0], right=rows[-1])
         plt.yticks([0,100000,200000,300000,400000,500000],["0","10⁵","2*10⁵","3*10⁵","4*10⁵","5*10⁵"])
-        plt.xticks([500,2000,4000,6000,8000,10000],["500","2000","4000","6000","8000","10000"])
+        plt.xticks([200,2000,4000,6000,8000,10000],["200","2000","4000","6000","8000","10000"])
 
         plt.xlabel('# Matrix Rows')
-        plt.ylabel('# Comparisons made to find PSP')
+        plt.ylabel('# Comparisons between Matrix entries')
         plt.grid(False)
-        plt.legend([line1[0], line2[0], line3[0], line4[0]], ["Bienstock", "Dallant", "Two Level Dallant", "Adjusted Randomized"])
+        plt.legend([line1[0], line2[0], line3[0], line4[0]], ["Bienstock", "Dallant", "Dallant recursively applied", "Adjusted Randomized"])
 
-        plt.savefig('ResultGraphs/FinalGeneral.png') 
+        plt.savefig('ResultGraphs/FinalGeneral.svg') 
 
 def FetchTestMatrices(table):
     conn = mysql_connection.new_connection()
@@ -668,6 +675,10 @@ def UpdateTestResult(matrixid, table, field_name, result):
     conn.close()
 
 if __name__ == '__main__':
+    Testsuite1Graph()
+    Testsuite2Graph()
+    Testsuite3Graph()
+    Testsuite4Graph()
     Testsuite5Graph()
     Testsuite6Graph()
     Testsuite7Graph()
