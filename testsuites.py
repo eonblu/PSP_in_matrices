@@ -16,6 +16,17 @@ from adjusted_randomized_psp import *
 from sadjusted_randomized_psp import *
 from tadjusted_randomized_psp import *
 
+# These are all the tables in database Matrices that need to be created if you want to run all tests, adjust final line to run TestsuiteX()
+# CREATE TABLE SSPinRandomMatrices (MRows int, MatricesWithSSP int, NumberOfTestedMatrices int);
+# CREATE TABLE FindingMinL (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int);
+# CREATE TABLE BienstockDallantGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int);
+# CREATE TABLE DallantTwoLevelGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, RecursiveRes int, TwoLevelRes int);
+# CREATE TABLE RandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float);
+# CREATE TABLE AdjustedRandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float, HardFailures int);
+# CREATE TABLE SAdjustedRandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float, HardFailures int);
+# CREATE TABLE TAdjustedRandomizedPSPLargerSmaller (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, LargerCount float, SmallerCount float, HardFailures int);
+# CREATE TABLE FinalGeneral (MatrixID int AUTO_INCREMENT PRIMARY KEY, MatrixSeed int, MRows int, BienstockRes int, RecursiveRes int, TwoLevelRes int, RandomizedRes int);
+
 main_color = "xkcd:royal blue"
 second_color = "xkcd:red"
 third_color = "xkcd:green"
@@ -279,18 +290,22 @@ def Testsuite5Graph():
 
         rows = sorted(grouped_data.keys())
         result = [np.mean([grouped_data[row]]) for row in rows]
+        max_res = [np.max([grouped_data[row]]) for row in rows]
+        min_res = [np.min([grouped_data[row]]) for row in rows]
 
         plt.figure(figsize=graph_size)
 
         line1 = plt.plot(rows, result, linestyle='-', color=main_color, marker='')
+        fill_between = plt.fill_between(rows, max_res, min_res, alpha=.3, linewidth=0, color=main_color)
 
         plt.ylim(bottom=0, top=3)
         plt.xlim(left=rows[0], right=rows[-1])
-        plt.yticks([0,1,2,3],["0","1","2","3"])
+        plt.yticks([0,1,2,3,4,5],["0","1","2","3","4","5"])
         plt.xticks([200,2000,4000,6000,8000,10000],["200","2000","4000","6000","8000","10000"])
 
         plt.xlabel('# Matrix Rows')
         plt.ylabel('# Rows/Columns to be\nremoved based on pivot')
+        plt.legend([line1[0]], ["to be removed based on pivot"], loc='upper left')
         plt.grid(False)
 
         plt.savefig('ResultGraphs/RandomizedPSPLargerSmaller.svg')
@@ -359,7 +374,7 @@ def Testsuite6Graph():
         plt.ylabel('Hard failure rate')
         plt.ylim(bottom=0, top=0.05)
         plt.yticks([0,0.01,0.02,0.03,0.04,0.05],["0%","1%","2%","3%","4%","5%"])
-        plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
+        plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "hard failures"], loc='upper left')
         plt.savefig('ResultGraphs/AdjustedRandomizedPSPLargerSmaller.svg')
         plt.clf()
 
@@ -427,7 +442,7 @@ def Testsuite7Graph():
         plt.ylabel('Hard failure rate')
         plt.yticks([0,0.01,0.02,0.03,0.04,0.05],["0%","1%","2%","3%","4%","5%"])
         plt.ylim(bottom=0, top=0.05)
-        plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
+        plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "hard failures"], loc='upper left')
         plt.savefig('ResultGraphs/SAdjustedRandomizedPSPLargerSmaller.svg')
         plt.clf()
 
@@ -495,7 +510,7 @@ def Testsuite8Graph():
         plt.ylabel('Hard failure rate')
         plt.yticks([0,0.01,0.02,0.03,0.04,0.05],["0%","1%","2%","3%","4%","5%"])
         plt.ylim(bottom=0, top=0.05)
-        plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "% hard failures"], loc='upper left')
+        plt.legend([line1[0], line2[0], line3[0]], ["to be removed based on pivot", "minimum to pass soft failure", "hard failures"], loc='upper left')
         plt.savefig('ResultGraphs/TAdjustedRandomizedPSPLargerSmaller.svg')
         plt.clf()
 
@@ -675,12 +690,5 @@ def UpdateTestResult(matrixid, table, field_name, result):
     conn.close()
 
 if __name__ == '__main__':
+    Testsuite1()
     Testsuite1Graph()
-    Testsuite2Graph()
-    Testsuite3Graph()
-    Testsuite4Graph()
-    Testsuite5Graph()
-    Testsuite6Graph()
-    Testsuite7Graph()
-    Testsuite8Graph()
-    Testsuite9Graph()

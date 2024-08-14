@@ -125,13 +125,4 @@ def ReduceMatrix(matrix, s, CompsObj):
             return "Failed"
     print(matrix)
     return BienstockBase(matrix, s, CompsObj)[0]
-
-
-if __name__ == '__main__':
-    MID = 9
-    CompsObjRandom = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(MID)
-    print(ReduceMatrix(matrix, 7, CompsObjRandom))
-    print(CompsObjRandom.value)
-
     

@@ -42,7 +42,3 @@ def new_connection():
 def close_connection(connection):
     if connection.is_connected():
         connection.close()
-
-if __name__ == '__main__':
-    conn = new_connection()
-    close_connection(conn)

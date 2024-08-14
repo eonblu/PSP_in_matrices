@@ -133,11 +133,4 @@ def ReduceMatrixTestsuite(matrix, CompsObj):
                 matrix = np.delete(matrix, row, 0)
     else:
         return [columns_to_remove, rows_to_remove]
-
-if __name__ == '__main__':
-    MID = 13
-    CompsObjRandom = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(MID)
-    print(ReduceMatrixTestsuite(matrix, CompsObjRandom))
-
     

@@ -288,6 +288,3 @@ def test_heap(n):
 		assert minmaxheapproperty(heap.a, len(heap))
 		print(heap.a, heap.size)
 	print("OK")
-
-if __name__ == '__main__':
-    test(15)

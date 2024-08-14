@@ -1,0 +1,5 @@
+[reader]replace_with_read_only_username:replace_with_password
+[creator]replace_with_write_username:replace_with_password
+
+
+# The tag in the brackets up front needs to stay, only replace username and password

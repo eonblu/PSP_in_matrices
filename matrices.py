@@ -111,10 +111,3 @@ def retrieve_matrix(matrix_id):
     cursor.close()
     mysql_connection.close_connection(conn)
     return matrix, rows, matrix_id
-
-if __name__ == '__main__':
-    seed = 2129
-    r = 4
-    print(create_matrix_with_ssp(seed, r))
-    # matrix1 = create_matrix_with_ssp(seed, r)
-    # add_to_mysql_table(matrix1, seed)

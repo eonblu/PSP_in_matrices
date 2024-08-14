@@ -131,10 +131,3 @@ def AdjustedReduceMatrixTestsuite(matrix, CompsObj):
     p_hor, columns_to_remove = AdjustedFindHorizontalPivot(matrix, CompsObj)
     p_ver, rows_to_remove = AdjustedFindVerticalPivot(matrix, CompsObj)
     return [columns_to_remove, rows_to_remove]
-
-if __name__ == '__main__':
-    MID = 19
-    CompsObjRandom = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(MID)
-    result = AdjustedReduceMatrix(matrix, CompsObjRandom)
-    print(result, CompsObjRandom.value)

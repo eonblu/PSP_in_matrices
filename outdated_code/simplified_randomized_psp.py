@@ -93,10 +93,3 @@ def SimpleReduceMatrix(matrix, samplesize, CompsObj):
             if len(matrix) > samplesize:
                 matrix = np.delete(matrix, row, 0)
     return BienstockBase(matrix, samplesize, CompsObj)[0]
-
-if __name__ == '__main__':
-    MID = 9
-    CompsObjRandom = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(MID)
-    print(SimpleReduceMatrix(matrix, 5, CompsObjRandom))
-    print(CompsObjRandom.value)

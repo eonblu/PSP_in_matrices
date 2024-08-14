@@ -22,6 +22,3 @@ def select_kth_triplet_main(array, k, CompsObj, left, right):
 
 def select_kth_triplet(array, k, CompsObj):
     return select_kth_triplet_main(array, k, CompsObj, 0, len(array)-1)
-
-if __name__ == '__main__':
-    select_kth_triplet([[13, 0, 0], [14, 1, 2], [6, 2, 0], [13, 3, 2], [8, 4, 1], [15, 5, 2]], 0, None)

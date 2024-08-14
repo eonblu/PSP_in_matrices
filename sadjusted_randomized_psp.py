@@ -147,10 +147,3 @@ def SAdjustedReduceMatrixTestsuite(matrix, CompsObj):
     p_hor, columns_to_remove = SAdjustedFindHorizontalPivot(matrix, CompsObj)
     p_ver, rows_to_remove = SAdjustedFindVerticalPivot(matrix, CompsObj)
     return [columns_to_remove, rows_to_remove]
-
-if __name__ == '__main__':
-    MID = 9
-    CompsObjRandom = Comparisons()
-    matrix, rows, matrixid = retrieve_matrix(MID)
-    result = SAdjustedReduceMatrix(matrix, CompsObjRandom)
-    print(result, CompsObjRandom.value)

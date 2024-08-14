@@ -192,9 +192,3 @@ def UpdateResult(matrixid, field_name, result):
         if conn.is_connected():
             cursor.close()
             conn.close()
-
-if __name__ == '__main__':
-    matrix = create_matrix_with_ssp(97, 18000)
-    print(matrix)
-    CompsObj = Comparisons()
-    print(RecursiveBase(matrix, len(matrix), CompsObj, 2))

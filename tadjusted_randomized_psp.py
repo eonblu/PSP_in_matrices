@@ -158,9 +158,3 @@ def TAdjustedReduceMatrixTestsuite(matrix, CompsObj):
     p_hor, columns_to_remove = TAdjustedFindHorizontalPivot(matrix, CompsObj)
     p_ver, rows_to_remove = TAdjustedFindVerticalPivot(matrix, CompsObj)
     return [columns_to_remove, rows_to_remove]
-
-if __name__ == '__main__':
-    CompsObjRandom = Comparisons()
-    matrix = create_matrix_with_ssp(300, 500)
-    result = TAdjustedReduceMatrix(matrix, CompsObjRandom)
-    print(result, CompsObjRandom.value)
