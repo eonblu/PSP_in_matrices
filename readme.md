@@ -13,3 +13,5 @@ To generate the graphs the function TestsuiteXGraph() needs to be run after the 
 Note that some of the tests may run for more than a day depending on the machine they are running on
 #### Patchnotes
 Adjustments to the repository after finalizing the thesis will be collected here
+
+5.10.2024 - Added MIT License

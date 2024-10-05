@@ -6,6 +6,7 @@ backup_latex.txt
 
 # Sources
 /Sources/*
+/Defense/*
 
 # Nodejs Server
 /nodejs-server_backup
